@@ -14,7 +14,8 @@ function writeVersion(lasFilePath) {
     fs.appendFileSync(lasFilePath, '#Delimiting character ( SPACE TAB OR COMMA ).\r\n\r\n');
 }
 
-function writeWellHeader(lasFilePath, wellHeaders) {
+function writeWellHeader(lasFilePath, well) {
+    let wellHeaders = well.well_headers;
     fs.appendFileSync(lasFilePath, '~Well\r\n');
     fs.appendFileSync(lasFilePath, '#MNEM.UNIT          DATA                                DESCRIPTION\r\n');
     fs.appendFileSync(lasFilePath, '#----- ----        -----------------                   -----------\r\n');
@@ -210,7 +211,7 @@ function writeAll(exportPath, project, well, datasetObjs, username, s3, curveMod
     fileName = fileName.replace(/\//g, "-");
     lasFilePath = path.join(lasFilePath, fileName);
     writeVersion(lasFilePath);
-    writeWellHeader(lasFilePath, well.well_headers);
+    writeWellHeader(lasFilePath, well);
     // if (project) { //export from project
     //     async.mapSeries(datasetObjs, function (item, cb) {
     //         console.log('111111', item.idCurves);
