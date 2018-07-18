@@ -9,7 +9,6 @@ let hashDir = wiImport.hashDir;
 
 
 async function writeCurve(lasFilePath, exportPath, fileName, project, well, dataset, idCurves, s3, curveModel, curveBasePath, callback) {
-    console.log('write csv called');
     /*export from inventory
         project, curveBasePath are null
     */
@@ -104,7 +103,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                                     wellName: well.name,
                                     datasetName: dataset.name
                                 });
-                            }) 
+                            })
                         }
                     });
                     tokenArr = [];
@@ -115,8 +114,11 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                 }
             })
             readStreams[i].on('end', function () {
-                if(!readStreams.numLine) {
-                    readStreams.numLine = readLine;                    
+                if (!readStreams.numLine) {
+                    readStreams.numLine = readLine;
+                }
+                if (writeLine == 0) {
+                    callback('No curve data');
                 }
                 console.log('END TIME', new Date(), readStreams.numLine);
                 if (i != readStreams.length - 1) {
@@ -155,25 +157,25 @@ function writeAll(exportPath, project, well, idDataset, idCurves, username, s3, 
         fileName = fileName.replace(/\//g, "-");
         lasFilePath = path.join(lasFilePath, fileName);
 
-        if (project) { //export from project
-            writeCurve(lasFilePath, exportPath, fileName, project, null, dataset, idCurves, null, null, curveBasePath, function (err, rs) {
-                console.log('writeAll callback called', rs);
-                if (err) {
-                    callback(err);
-                } else {
-                    callback(null, rs);
-                }
-            });
-        } else { //export from inventory
-            writeCurve(lasFilePath, exportPath, fileName, null, well, dataset, idCurves, s3, curveModel, null, function (err, rs) {
-                console.log('writeAll callback called', rs);
-                if (err) {
-                    callback(err);
-                } else {
-                    callback(null, rs);
-                }
-            });
-        }
+        // if (project) { //export from project
+        //     writeCurve(lasFilePath, exportPath, fileName, project, null, dataset, idCurves, null, null, curveBasePath, function (err, rs) {
+        //         console.log('writeAll callback called', rs);
+        //         if (err) {
+        //             callback(err);
+        //         } else {
+        //             callback(null, rs);
+        //         }
+        //     });
+        // } else { //export from inventory
+        writeCurve(lasFilePath, exportPath, fileName, project, well, dataset, idCurves, s3, curveModel, curveBasePath, function (err, rs) {
+            console.log('writeAll callback called', rs);
+            if (err) {
+                callback(err);
+            } else {
+                callback(null, rs);
+            }
+        });
+        // }
     } else {
         console.log('no dataset');
         callback(null, null);

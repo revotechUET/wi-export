@@ -12,7 +12,8 @@ function writeVersion(lasFilePath) {
     fs.appendFileSync(lasFilePath, 'WRAP .        NO     : One Line per Depth Step \r\n');
 }
 
-function writeWellHeader(lasFilePath, wellHeaders) {
+function writeWellHeader(lasFilePath, well) {
+    let wellHeaders = well.well_headers;
     fs.appendFileSync(lasFilePath, '~Well\r\n');
     fs.appendFileSync(lasFilePath, '#MNEM.UNIT       Data Type                    Information\r\n');
     fs.appendFileSync(lasFilePath, '#---------       ---------                    -------------------------------\r\n');
@@ -22,10 +23,10 @@ function writeWellHeader(lasFilePath, wellHeaders) {
     let stepHeader = ' STEP.M       ';
     for (i in wellHeaders) {
         if (wellHeaders[i].header === 'STRT' && strtHeader == ' STRT.M       ') {
-            strtHeader += space.spaceAfter(36, wellHeaders[i].value) + ":" + wellHeaders[i].description;
+            strtHeader += space.spaceAfter(24, wellHeaders[i].value) + ": " + wellHeaders[i].description;
         }
-        if(wellHeaders[i].header === 'TOP' && strtHeader == ' STRT.M       ') {
-            strtHeader += space.spaceAfter(36, wellHeaders[i].value) + ":" + wellHeaders[i].description;            
+        if (wellHeaders[i].header === 'TOP' && strtHeader == ' STRT.M       ') {
+            strtHeader += space.spaceAfter(24, wellHeaders[i].value) + ": " + wellHeaders[i].description;
         }
         if (wellHeaders[i].header === 'STOP') {
             stopHeader += space.spaceAfter(24, wellHeaders[i].value) + ": " + wellHeaders[i].description;
@@ -36,6 +37,16 @@ function writeWellHeader(lasFilePath, wellHeaders) {
     }
     fs.appendFileSync(lasFilePath, strtHeader + '\r\n' + stopHeader + '\r\n' + stepHeader + '\r\n');
     //append other headers
+    let WELL_header = wellHeaders.find(function (h) { return h.value == 'WELL' });
+    let NULL_header = wellHeaders.find(function (h) { return h.value == 'NULL' });
+    if (!WELL_header) {
+        let header = space.spaceAfter(14, " " + 'WELL' + '.') + space.spaceAfter(24, well.name) + ": " + 'WELL NAME' + '\r\n';
+        fs.appendFileSync(lasFilePath, header);
+    }
+    if (!NULL_header) {
+        let header = space.spaceAfter(14, " " + 'NULL' + '.') + space.spaceAfter(24, '-999.2500') + ": \r\n";
+        fs.appendFileSync(lasFilePath, header);
+    }
     for (i in wellHeaders) {
         if (wellHeaders[i].value && wellHeaders[i].header !== 'filename' && wellHeaders[i].header !== 'STRT' && wellHeaders[i].header !== 'STOP' && wellHeaders[i].header !== 'STEP') {
             let header = space.spaceAfter(14, " " + wellHeaders[i].header.toString() + '.') + space.spaceAfter(24, wellHeaders[i].value) + ": " + wellHeaders[i].description + '\r\n';
@@ -87,11 +98,11 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                 readStreams.push(stream);
                 fs.appendFileSync(lasFilePath, curve.name + '.' + curve.unit + '  :\r\n');
             }
-            if (idCurve == 0) {
+            
+            if (idCurve == 0) 
                 curveColumns += space.spaceBefore(15, curve.name);
-            } else {
+            else 
                 curveColumns += space.spaceBefore(18, curve.name);
-            }
 
         }
     }
@@ -122,7 +133,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
         }
     } else {
         readStreams[0].resume();
-        for(let i = 0; i< readStreams.length; i++) {
+        for (let i = 0; i < readStreams.length; i++) {
             console.log('~', readStreams[i].isPaused());
         }
         for (let i = 0; i < readStreams.length; i++) {
@@ -174,16 +185,16 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                 callback(err);
             })
             readStreams[i].on('end', function () {
-                if(!readStreams.numLine) {
-                    readStreams.numLine = readLine;   
-                    console.log('numLine', readStreams.numLine);                 
+                if (!readStreams.numLine) {
+                    readStreams.numLine = readLine;
+                    console.log('numLine', readStreams.numLine);
                 }
-                if(readLine == 0) {
+                if (readLine == 0) {
                     callback('No curve data');
                 }
                 console.log('END TIME', new Date(), readStreams.numLine);
                 if (i != readStreams.length - 1) {
-                    console.log('---', i, readStreams.length-1);
+                    console.log('---', i, readStreams.length - 1);
                     readStreams[i + 1].resume();
                 }
             })
@@ -219,26 +230,26 @@ function writeAll(exportPath, project, well, idDataset, idCurves, username, s3, 
         fileName = fileName.replace(/\//g, "-");
         lasFilePath = path.join(lasFilePath, fileName);
         writeVersion(lasFilePath);
-        writeWellHeader(lasFilePath, well.well_headers);
-        if (project) { //export from project
-            writeCurve(lasFilePath, exportPath, fileName, project, null, dataset, idCurves, null, null, curveBasePath, function(err, rs) {
-                console.log('writeAll callback called', rs);
-                if(err) {
-                    callback(err);
-                } else {
-                    callback(null, rs);
-                }
-            });
-        } else { //export from inventory
-            writeCurve(lasFilePath, exportPath, fileName, null, well, dataset, idCurves, s3, curveModel, null, function(err, rs) {
-                console.log('writeAll callback called', rs);
-                if(err) {
-                    callback(err);
-                } else {
-                    callback(null, rs);
-                }
-            });
-        }
+        writeWellHeader(lasFilePath, well);
+        // if (project) { //export from project
+        //     writeCurve(lasFilePath, exportPath, fileName, project, null, dataset, idCurves, null, null, curveBasePath, function(err, rs) {
+        //         console.log('writeAll callback called', rs);
+        //         if(err) {
+        //             callback(err);
+        //         } else {
+        //             callback(null, rs);
+        //         }
+        //     });
+        // } else { //export from inventory
+        writeCurve(lasFilePath, exportPath, fileName, project, well, dataset, idCurves, s3, curveModel, curveBasePath, function (err, rs) {
+            console.log('writeAll callback called', rs);
+            if (err) {
+                callback(err);
+            } else {
+                callback(null, rs);
+            }
+        });
+        // }
     } else {
         console.log('no dataset');
         callback(null, null);
