@@ -157,16 +157,6 @@ function writeAll(exportPath, project, well, idDataset, idCurves, username, s3, 
         fileName = fileName.replace(/\//g, "-");
         lasFilePath = path.join(lasFilePath, fileName);
 
-        // if (project) { //export from project
-        //     writeCurve(lasFilePath, exportPath, fileName, project, null, dataset, idCurves, null, null, curveBasePath, function (err, rs) {
-        //         console.log('writeAll callback called', rs);
-        //         if (err) {
-        //             callback(err);
-        //         } else {
-        //             callback(null, rs);
-        //         }
-        //     });
-        // } else { //export from inventory
         writeCurve(lasFilePath, exportPath, fileName, project, well, dataset, idCurves, s3, curveModel, curveBasePath, function (err, rs) {
             console.log('writeAll callback called', rs);
             if (err) {

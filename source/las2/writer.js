@@ -231,16 +231,6 @@ function writeAll(exportPath, project, well, idDataset, idCurves, username, s3, 
         lasFilePath = path.join(lasFilePath, fileName);
         writeVersion(lasFilePath);
         writeWellHeader(lasFilePath, well);
-        // if (project) { //export from project
-        //     writeCurve(lasFilePath, exportPath, fileName, project, null, dataset, idCurves, null, null, curveBasePath, function(err, rs) {
-        //         console.log('writeAll callback called', rs);
-        //         if(err) {
-        //             callback(err);
-        //         } else {
-        //             callback(null, rs);
-        //         }
-        //     });
-        // } else { //export from inventory
         writeCurve(lasFilePath, exportPath, fileName, project, well, dataset, idCurves, s3, curveModel, curveBasePath, function (err, rs) {
             console.log('writeAll callback called', rs);
             if (err) {
