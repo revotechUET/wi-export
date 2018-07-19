@@ -7,7 +7,12 @@ let wiImport = require('wi-import');
 var csv = require('fast-csv');
 let hashDir = wiImport.hashDir;
 
-
+function writeHeader(csvStream, well) {
+    let headerArr = ['$Csv : ']
+    headerArr.push(well.name)
+    csvStream.write(headerArr);
+    csvStream.write([]);
+}
 async function writeCurve(lasFilePath, exportPath, fileName, project, well, dataset, idCurves, s3, curveModel, curveBasePath, callback) {
     /*export from inventory
         project, curveBasePath are null
@@ -28,33 +33,44 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
     var csvStream = csv.createWriteStream({ headers: false });
     let writeStream = fs.createWriteStream(lasFilePath, { flags: 'a' });
     csvStream.pipe(writeStream);
+    writeHeader(csvStream, well);
+
     let countCurve = 0;
     let curveNameArr = [];
-    curveNameArr.push('MD');
+    let curveUnitArr = [];
+    curveNameArr.push('Depth');
+    curveUnitArr.push('M');
 
     for (idCurve of idCurves) {
         let curve = dataset.curves.find(function (curve) { return curve.idCurve == idCurve });
         if (curve) {
+            let stream;
             countCurve++;
             curveNameArr.push(curve.name);
+            let unit = curve.curve_revisions ? curve.curve_revisions[0].unit : curve.unit;
+            curveUnitArr.push(unit);
             if (!project) { //export from inventory
                 let curvePath = await curveModel.getCurveKey(curve.curve_revisions[0]);
                 console.log('curvePath=========', curvePath);
-                let stream = await s3.getData(curvePath);
-                stream = byline.createStream(stream);
-                readStreams.push(stream);
+                try{
+                    stream = await s3.getData(curvePath);
+                } catch(e) {
+                    console.log('=============NOT FOUND CURVE FROM S3', e);
+                    callback(e);
+                }
             } else { //export from project
                 let curvePath = await hashDir.createPath(curveBasePath, project.createdBy + project.name + well.name + dataset.name + curve.name, curve.name + '.txt');
-                let stream = fs.createReadStream(curvePath);
-                stream = byline.createStream(stream);
-                readStreams.push(stream);
+                stream = fs.createReadStream(curvePath);
             }
+            stream = byline.createStream(stream).pause();
+            readStreams.push(stream);
         }
     }
 
     if (readStreams.length === 0) {
         console.log('hiuhiu');
         csvStream.write(curveNameArr);
+        csvStream.write(curveUnitArr);
         for (let i = top; i < bottom + step; i += step) {
             csvStream.write([i.toFixed(4)]);
             if (i >= bottom) {
@@ -66,7 +82,9 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
             }
         }
     } else {
+        readStreams[0].resume();
         csvStream.write(curveNameArr);
+        csvStream.write(curveUnitArr);
         let tokenArr = [];
         for (let i = 0; i < readStreams.length; i++) {
             let readLine = 0;
@@ -117,7 +135,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                 if (!readStreams.numLine) {
                     readStreams.numLine = readLine;
                 }
-                if (writeLine == 0) {
+                if (i == readStreams.length - 1 && readLine == 0) {
                     callback('No curve data');
                 }
                 console.log('END TIME', new Date(), readStreams.numLine);
@@ -156,9 +174,9 @@ function writeAll(exportPath, project, well, idDataset, idCurves, username, s3, 
         let fileName = dataset.name + "_" + well.name + "_" + Date.now() + '.csv'
         fileName = fileName.replace(/\//g, "-");
         lasFilePath = path.join(lasFilePath, fileName);
-
+        
         writeCurve(lasFilePath, exportPath, fileName, project, well, dataset, idCurves, s3, curveModel, curveBasePath, function (err, rs) {
-            console.log('writeAll callback called', rs);
+            console.log('writeAll callback called', err, rs);
             if (err) {
                 callback(err);
             } else {

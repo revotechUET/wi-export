@@ -81,20 +81,28 @@ async function writeDataset(lasFilePath, exportPath, fileName, project, well, da
     for (idCurve of idCurves) {
         let curve = dataset.curves.find(function (curve) { return curve.idCurve == idCurve });
         let line;
-        if (project) { //export from project
-            line = space.spaceAfter(12, curve.name) + '.' + space.spaceAfter(39, curve.unit) + ':\r\n';
-            let curvePath = await hashDir.createPath(curveBasePath, project.createdBy + project.name + well.name + dataset.name + curve.name, curve.name + '.txt');
-            console.log('curvePath', curvePath);
-            let stream = byline.createStream(fs.createReadStream(curvePath)).pause();
+        if(curve) {
+            let stream;
+            if (project) { //export from project
+                line = space.spaceAfter(12, curve.name) + '.' + space.spaceAfter(39, curve.unit) + ':\r\n';
+                let curvePath = await hashDir.createPath(curveBasePath, project.createdBy + project.name + well.name + dataset.name + curve.name, curve.name + '.txt');
+                console.log('curvePath', curvePath);
+                stream = fs.createReadStream(curvePath);
+            } else { //export from inventory
+                line = space.spaceAfter(12, curve.name) + '.' + space.spaceAfter(39, curve.curve_revisions[0].unit) + ':\r\n';
+                let curvePath = await curveModel.getCurveKey(curve.curve_revisions[0]);
+                console.log('curvePath=========', curvePath);
+                try {
+                    stream = await s3.getData(curvePath)                    
+                } catch(e) {
+                    console.log('=============NOT FOUND CURVE FROM S3', e);
+                    callback(e);
+                }
+            }
+            stream = byline.createStream(stream).pause();
             readStreams.push(stream);
-        } else { //export from inventory
-            line = space.spaceAfter(12, curve.name) + '.' + space.spaceAfter(39, curve.curve_revisions[0].unit) + ':\r\n';
-            let curvePath = await curveModel.getCurveKey(curve.curve_revisions[0]);
-            console.log('curvePath=========', curvePath);
-            let stream = byline.createStream(await s3.getData(curvePath)).pause();
-            readStreams.push(stream);
+            fs.appendFileSync(lasFilePath, line);
         }
-        fs.appendFileSync(lasFilePath, line);
     }
     fs.appendFileSync(lasFilePath, '\r\n\r\n' + '~' + dataset.name + '_DATA | ' + dataset.name + '_DEFINITION\r\n');
 
@@ -171,7 +179,7 @@ async function writeDataset(lasFilePath, exportPath, fileName, project, well, da
                 if (!readStreams.numLine) {
                     readStreams.numLine = readLine;
                 }
-                if (readLine == 0) {
+                if (i == readStreams.length - 1 && readLine == 0) {
                     callback('No curve data');
                 }
                 console.log('END TIME', new Date(), readStreams.numLine);

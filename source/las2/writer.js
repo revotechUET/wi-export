@@ -83,25 +83,29 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
     for (idCurve of idCurves) {
         let curve = dataset.curves.find(function (curve) { return curve.idCurve == idCurve });
         if (curve) {
+            let stream;
             if (!project) { //export from inventory
                 let curvePath = await curveModel.getCurveKey(curve.curve_revisions[0]);
                 console.log('curvePath=========', curvePath);
-                let stream = await s3.getData(curvePath);
-                stream = byline.createStream(stream).pause();
-                readStreams.push(stream);
+                try {
+                    stream = await s3.getData(curvePath);                    
+                } catch(e) {
+                    console.log('=============NOT FOUND CURVE FROM S3', e);
+                    callback(e);
+                }
                 fs.appendFileSync(lasFilePath, space.spaceAfter(46, curve.name + '.' + curve.curve_revisions[0].unit + '  :') + curve.description + '\r\n');
             } else { //export from project
                 let curvePath = await hashDir.createPath(curveBasePath, project.createdBy + project.name + well.name + dataset.name + curve.name, curve.name + '.txt');
                 console.log('curvePath', curvePath);
-                let stream = fs.createReadStream(curvePath);
-                stream = byline.createStream(stream).pause();
-                readStreams.push(stream);
+                stream = fs.createReadStream(curvePath);
                 fs.appendFileSync(lasFilePath, curve.name + '.' + curve.unit + '  :\r\n');
             }
-            
-            if (idCurve == 0) 
+            stream = byline.createStream(stream).pause();
+            readStreams.push(stream);
+
+            if (idCurve == 0)
                 curveColumns += space.spaceBefore(15, curve.name);
-            else 
+            else
                 curveColumns += space.spaceBefore(18, curve.name);
 
         }
@@ -189,7 +193,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                     readStreams.numLine = readLine;
                     console.log('numLine', readStreams.numLine);
                 }
-                if (readLine == 0) {
+                if (i == readStreams.length - 1 && readLine == 0) {
                     callback('No curve data');
                 }
                 console.log('END TIME', new Date(), readStreams.numLine);
