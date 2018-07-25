@@ -136,16 +136,23 @@ async function writeDataset(lasFilePath, exportPath, fileName, project, well, da
                     })
                     tokens = nullHeader.value;
                 }
+                let index = tokens.toString().substring(0, tokens.toString().indexOf(" "));
                 tokens = tokens.toString().substring(tokens.toString().indexOf(" ") + 1);
                 if (i !== readStreams.length - 1) {
                     tokens += ',';
                 }
                 tokens = space.spaceBefore(15, tokens);
                 if (i === 0) {
-                    let depth = top.toFixed(5).toString() + ',';
+                    // index = Number(index);
+                    let depth;
+                    if(index.toFixed(2) == top.toFixed(2)) {
+                        let depth = index.toFixed(5).toString() + ',';
+                    } else {
+                        let depth = top.toFixed(5).toString() + ',';
+                        top += step;
+                    }
                     depth = space.spaceBefore(16, depth);
                     tokens = depth + tokens;
-                    top += step;
                 }
                 if (i !== readStreams.length - 1) {
                     writeStream.write(tokens, function () {
