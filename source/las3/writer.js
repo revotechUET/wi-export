@@ -121,6 +121,7 @@ async function writeDataset(lasFilePath, exportPath, fileName, project, well, da
         }
     } else {
         readStreams[0].resume();
+        let hasDepth;
         for (let i = 0; i < readStreams.length; i++) {
             if (i == 0 && readStreams[i].isPaused()) {
                 readStreams[i].resume();
@@ -145,8 +146,9 @@ async function writeDataset(lasFilePath, exportPath, fileName, project, well, da
                 if (i === 0) {
                     index = Number(index);
                     let depth;
-                    if(index.toFixed(2) == top.toFixed(2)) {
+                    if(index.toFixed(2) == top.toFixed(2) || hasDepth) {
                         depth = index.toFixed(5).toString() + ',';
+                        hasDepth = true;
                     } else {
                         depth = top.toFixed(5).toString() + ',';
                         top += step;
