@@ -143,12 +143,12 @@ async function writeDataset(lasFilePath, exportPath, fileName, project, well, da
                 }
                 tokens = space.spaceBefore(15, tokens);
                 if (i === 0) {
-                    // index = Number(index);
+                    index = Number(index);
                     let depth;
                     if(index.toFixed(2) == top.toFixed(2)) {
-                        let depth = index.toFixed(5).toString() + ',';
+                        depth = index.toFixed(5).toString() + ',';
                     } else {
-                        let depth = top.toFixed(5).toString() + ',';
+                        depth = top.toFixed(5).toString() + ',';
                         top += step;
                     }
                     depth = space.spaceBefore(16, depth);
