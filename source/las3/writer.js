@@ -57,7 +57,7 @@ function writeWellHeader(lasFilePath, well) {
     }
 }
 
-async function writeDataset(lasFilePath, exportPath, fileName, project, well, dataset, idCurves, s3, curveModel, curveBasePath, callback) {
+async function writeDataset(lasFilePath, fileName, project, well, dataset, idCurves, s3, curveModel, curveBasePath, callback) {
     if (!project && dataset.dataset_params.length > 0) { //export from inventory
         fs.appendFileSync(lasFilePath, '\r\n~' + dataset.name.toUpperCase() + '_PARAMETER\r\n');
         fs.appendFileSync(lasFilePath, '#MNEM.UNIT                    VALUE                        DESCRIPTION\r\n');
@@ -233,7 +233,7 @@ function writeAll(exportPath, project, well, datasetObjs, username, s3, curveMod
         console.log('callback', cb);
         console.log('111111', item.idCurves);
         let dataset = well.datasets.find(function (dataset) { return dataset.idDataset == item.idDataset; });
-        writeDataset(lasFilePath, exportPath, fileName, project, well, dataset, item.idCurves, s3, curveModel, curveBasePath, cb);
+        writeDataset(lasFilePath, fileName, project, well, dataset, item.idCurves, s3, curveModel, curveBasePath, cb);
     }, function cb(err, rs) {
         console.log('map series callback');
         if (err) {

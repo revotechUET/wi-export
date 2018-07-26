@@ -2,7 +2,7 @@ let path = require('path');
 let fs = require('fs');
 let byline = require('byline');
 let async = require('async');
-let space = require('../space');
+let space = require('../../space');
 let wiImport = require('wi-import');
 var csv = require('fast-csv');
 let hashDir = wiImport.hashDir;
@@ -35,7 +35,6 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
     csvStream.pipe(writeStream);
     writeHeader(csvStream, well);
 
-    let countCurve = 0;
     let curveNameArr = [];
     let curveUnitArr = [];
     curveNameArr.push('Depth');
@@ -45,7 +44,6 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
         let curve = dataset.curves.find(function (curve) { return curve.idCurve == idCurve });
         if (curve) {
             let stream;
-            countCurve++;
             curveNameArr.push(curve.name);
             let unit = curve.curve_revisions ? curve.curve_revisions[0].unit : curve.unit;
             curveUnitArr.push(unit);
