@@ -49,7 +49,7 @@ module.exports.exportCsvRVFromInventory = function (well, datasetObjs, exportPat
         }
     });
 };
-module.exports.exportCsvWDRVFromInventory = function (project, datasetObjs, exportPath, curveBasePath, username, callback) {
+module.exports.exportCsvWDRVFromInventory = function (well, datasetObjs, exportPath, s3, curveModel, username, callback) {
     csvWDRVWriter.writeAll(exportPath, null, well, datasetObjs, username, s3, curveModel, null, callback);    
 }
 
