@@ -62,10 +62,10 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
         fs.appendFileSync(lasFilePath, '\r\n~' + dataset.name.toUpperCase() + '_PARAMETER\r\n');
         fs.appendFileSync(lasFilePath, '#MNEM.UNIT                    VALUE                        DESCRIPTION\r\n');
         fs.appendFileSync(lasFilePath, '#--------------- ---         ------------                 -----------------\r\n\r\n');
-        for (param of dataset.dataset_params) {
-            let line = space.spaceAfter(16, param.mnem) + space.spaceAfter(14, '.') + space.spaceAfter(28, param.value) + ': ' + param.description + '\r\n';
-            fs.appendFileSync(lasFilePath, line);
-        }
+        // for (param of dataset.dataset_params) {
+        //     let line = space.spaceAfter(16, param.mnem) + space.spaceAfter(14, '.') + space.spaceAfter(28, param.value) + ': ' + param.description + '\r\n';
+        //     fs.appendFileSync(lasFilePath, line);
+        // }
     }
     fs.appendFileSync(lasFilePath, '\r\n\r\n~' + dataset.name.toUpperCase() + '_DEFINITION\r\n');
     fs.appendFileSync(lasFilePath, '#MNEM.UNIT                 LOG CODE                  CURVE DESCRIPTION\r\n');
@@ -142,6 +142,7 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
                 if (i !== readStreams.length - 1) {
                     tokens += ',';
                 }
+                tokens = parseFloat(tokens).toFixed(4);
                 tokens = space.spaceBefore(15, tokens);
                 if (i === 0) {
                     index = Number(index);

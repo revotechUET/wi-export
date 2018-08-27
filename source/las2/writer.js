@@ -115,12 +115,12 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
     fs.appendFileSync(lasFilePath, '#MNEM.UNIT       Value                        Description\r\n');
     fs.appendFileSync(lasFilePath, '#---------       ---------                    -------------\r\n');
 
-    if (dataset.dataset_params) {
-        for (param of dataset.dataset_params) {
-            fs.appendFileSync(lasFilePath, space.spaceAfter(17, param.mnem) + space.spaceAfter(29, param.value) + param.description + '\r\n');
-        }
-    }
-    fs.appendFileSync(lasFilePath, curveColumns + '\r\n');
+    // if (dataset.dataset_params) {
+    //     for (param of dataset.dataset_params) {
+    //         fs.appendFileSync(lasFilePath, space.spaceAfter(17, param.mnem) + space.spaceAfter(29, param.value) + param.description + '\r\n');
+    //     }
+    // }
+    // fs.appendFileSync(lasFilePath, curveColumns + '\r\n');
 
     //write curves
     if (readStreams.length === 0) {
@@ -153,6 +153,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                     })
                     tokens = nullHeader ? nullHeader.value : 'null';
                 }
+                tokens = parseFloat(tokens).toFixed(4);
                 tokens = space.spaceBefore(18, tokens);
                 if (i === 0) {
                     let depth = top.toFixed(4).toString();
