@@ -114,6 +114,8 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
     fs.appendFileSync(lasFilePath, '~Parameter\r\n');
     fs.appendFileSync(lasFilePath, '#MNEM.UNIT       Value                        Description\r\n');
     fs.appendFileSync(lasFilePath, '#---------       ---------                    -------------\r\n');
+    fs.appendFileSync(lasFilePath, curveColumns + '\r\n');
+    
 
     // if (dataset.dataset_params) {
     //     for (param of dataset.dataset_params) {
