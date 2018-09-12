@@ -139,9 +139,6 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
                 }
                 let index = tokens.toString().substring(0, tokens.toString().indexOf(" "));
                 tokens = tokens.toString().substring(tokens.toString().indexOf(" ") + 1);
-                if (i !== readStreams.length - 1) {
-                    tokens += ',';
-                }
                 tokens = parseFloat(tokens).toFixed(4);
                 tokens = space.spaceBefore(15, tokens);
                 if (i === 0) {
@@ -158,6 +155,7 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
                     tokens = depth + tokens;
                 }
                 if (i !== readStreams.length - 1) {
+                    tokens += ',';
                     writeStream.write(tokens, function () {
                     })
                     readStreams[i].pause();
