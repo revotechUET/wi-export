@@ -156,7 +156,8 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                     // tokens = nullHeader ? nullHeader.value : '-999.0000';
                     tokens = '-999';
                 }
-                tokens = parseFloat(tokens).toFixed(4);
+                if(token != '-999')
+                    tokens = parseFloat(tokens).toFixed(4);
                 tokens = space.spaceBefore(18, tokens);
                 if (i === 0) {
                     let depth = top.toFixed(4).toString();
