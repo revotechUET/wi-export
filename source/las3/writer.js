@@ -59,16 +59,16 @@ function writeWellHeader(lasFilePath, well) {
 }
 
 async function writeDataset(lasFilePath, fileName, project, well, dataset, idCurves, s3, curveModel, curveBasePath, callback) {
+    fs.appendFileSync(lasFilePath, '\r\n~' + dataset.name.toUpperCase().replace(/ /g, "_") + '_PARAMETER\r\n');
+    fs.appendFileSync(lasFilePath, '#MNEM.UNIT                    VALUE                        DESCRIPTION\r\n');
+    fs.appendFileSync(lasFilePath, '#--------------- ---         ------------                 -----------------\r\n\r\n');
     if (!project && dataset.dataset_params.length > 0) { //export from inventory
-        fs.appendFileSync(lasFilePath, '\r\n~' + dataset.name.toUpperCase() + '_PARAMETER\r\n');
-        fs.appendFileSync(lasFilePath, '#MNEM.UNIT                    VALUE                        DESCRIPTION\r\n');
-        fs.appendFileSync(lasFilePath, '#--------------- ---         ------------                 -----------------\r\n\r\n');
         // for (param of dataset.dataset_params) {
         //     let line = space.spaceAfter(16, param.mnem) + space.spaceAfter(14, '.') + space.spaceAfter(28, param.value) + ': ' + param.description + '\r\n';
         //     fs.appendFileSync(lasFilePath, line);
         // }
     }
-    fs.appendFileSync(lasFilePath, '\r\n\r\n~' + dataset.name.toUpperCase() + '_DEFINITION\r\n');
+    fs.appendFileSync(lasFilePath, '\r\n\r\n~' + dataset.name.toUpperCase().replace(/ /g, "_") + '_DEFINITION\r\n');
     fs.appendFileSync(lasFilePath, '#MNEM.UNIT                 LOG CODE                  CURVE DESCRIPTION\r\n');
     fs.appendFileSync(lasFilePath, '#----------- ----         ------------              -----------------\r\n\r\n');
     fs.appendFileSync(lasFilePath, 'DEPTH       .M                                      : Depth    {F}\r\n');
@@ -82,7 +82,7 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
     for (idCurve of idCurves) {
         let curve = dataset.curves.find(function (curve) { return curve.idCurve == idCurve });
         let line;
-        if(curve && curve.name != MDCurve) {
+        if (curve && curve.name != MDCurve) {
             let stream;
             if (project) { //export from project
                 line = space.spaceAfter(12, curve.name) + '.' + space.spaceAfter(39, curve.unit) + ':\r\n';
@@ -94,8 +94,8 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
                 let curvePath = await curveModel.getCurveKey(curve.curve_revisions[0]);
                 console.log('curvePath=========', curvePath);
                 try {
-                    stream = await s3.getData(curvePath)                    
-                } catch(e) {
+                    stream = await s3.getData(curvePath)
+                } catch (e) {
                     console.log('=============NOT FOUND CURVE FROM S3', e);
                     callback(e);
                 }
@@ -105,7 +105,7 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
             fs.appendFileSync(lasFilePath, line);
         }
     }
-    fs.appendFileSync(lasFilePath, '\r\n\r\n' + '~' + dataset.name + '_DATA | ' + dataset.name + '_DEFINITION\r\n');
+    fs.appendFileSync(lasFilePath, '\r\n\r\n' + '~' + dataset.name.replace(/ /g, "_") + '_DATA | ' + dataset.name.replace(/ /g, "_") + '_DEFINITION\r\n');
 
     //writeCurves
     if (readStreams.length === 0) {
@@ -141,13 +141,13 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
                     // tokens = nullHeader ? nullHeader.value :  '-999.0000';
                     tokens = '-999';
                 }
-                if(tokens != '-999')
+                if (tokens != '-999')
                     tokens = parseFloat(tokens).toFixed(4);
                 tokens = space.spaceBefore(15, tokens);
                 if (i === 0) {
                     index = Number(index);
                     let depth;
-                    if(index.toFixed(2) == top.toFixed(2) || hasDepth) {
+                    if (index.toFixed(2) == top.toFixed(2) || hasDepth) {
                         depth = index.toFixed(5).toString() + ',';
                         hasDepth = true;
                     } else {
