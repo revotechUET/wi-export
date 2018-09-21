@@ -131,14 +131,14 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
             readStreams[i].on('data', function (line) {
                 readLine++;
                 let tokens = line.toString('utf8').split("||");
+                let index = tokens.toString().substring(0, tokens.toString().indexOf(" "));
+                tokens = tokens.toString().substring(tokens.toString().indexOf(" ") + 1);
                 if (tokens == null || tokens == NaN || tokens == 'null' || tokens == 'NaN') {
                     let nullHeader = well.well_headers.find(header => {
                         return header.header == "NULL";
                     })
                     tokens = nullHeader ? nullHeader.value :  '-999.0000';
                 }
-                let index = tokens.toString().substring(0, tokens.toString().indexOf(" "));
-                tokens = tokens.toString().substring(tokens.toString().indexOf(" ") + 1);
                 tokens = parseFloat(tokens).toFixed(4);
                 tokens = space.spaceBefore(15, tokens);
                 if (i === 0) {
