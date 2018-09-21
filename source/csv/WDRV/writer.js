@@ -85,10 +85,11 @@ async function writeDataset(csvStream, writeStream, project, well, dataset, idCu
                 let tokens = line.toString('utf8').split("||");
                 tokens = tokens.toString().substring(tokens.toString().indexOf(" ") + 1);
                 if (tokens == null || tokens == NaN || tokens == 'null' || tokens == 'NaN') {
-                    let nullHeader = well.well_headers.find(header => {
-                        return header.header == "NULL";
-                    })
-                    tokens = nullHeader ? nullHeader.value : '-999.0000';
+                    // let nullHeader = well.well_headers.find(header => {
+                    //     return header.header == "NULL";
+                    // })
+                    // tokens = nullHeader ? nullHeader.value : '-999.0000';
+                    tokens = '-999';
                 }
                 if (i === 0) {
                     let depth = top.toFixed(4).toString();
