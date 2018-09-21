@@ -59,7 +59,7 @@ function writeWellHeader(lasFilePath, well) {
 }
 
 async function writeDataset(lasFilePath, fileName, project, well, dataset, idCurves, s3, curveModel, curveBasePath, callback) {
-    fs.appendFileSync(lasFilePath, '\r\n~' + dataset.name.toUpperCase().replace(/ /g, "_") + '_PARAMETER\r\n');
+    fs.appendFileSync(lasFilePath, '\r\n~' + dataset.name.toUpperCase().replace(/ /g, ".") + '_PARAMETER\r\n');
     fs.appendFileSync(lasFilePath, '#MNEM.UNIT                    VALUE                        DESCRIPTION\r\n');
     fs.appendFileSync(lasFilePath, '#--------------- ---         ------------                 -----------------\r\n\r\n');
     if (!project && dataset.dataset_params.length > 0) { //export from inventory
@@ -68,7 +68,7 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
         //     fs.appendFileSync(lasFilePath, line);
         // }
     }
-    fs.appendFileSync(lasFilePath, '\r\n\r\n~' + dataset.name.toUpperCase().replace(/ /g, "_") + '_DEFINITION\r\n');
+    fs.appendFileSync(lasFilePath, '\r\n\r\n~' + dataset.name.toUpperCase().replace(/ /g, ".") + '_DEFINITION\r\n');
     fs.appendFileSync(lasFilePath, '#MNEM.UNIT                 LOG CODE                  CURVE DESCRIPTION\r\n');
     fs.appendFileSync(lasFilePath, '#----------- ----         ------------              -----------------\r\n\r\n');
     fs.appendFileSync(lasFilePath, 'DEPTH       .M                                      : Depth    {F}\r\n');
@@ -105,7 +105,7 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
             fs.appendFileSync(lasFilePath, line);
         }
     }
-    fs.appendFileSync(lasFilePath, '\r\n\r\n' + '~' + dataset.name.replace(/ /g, "_") + '_DATA | ' + dataset.name.replace(/ /g, "_") + '_DEFINITION\r\n');
+    fs.appendFileSync(lasFilePath, '\r\n\r\n' + '~' + dataset.name.replace(/ /g, ".") + '_DATA | ' + dataset.name.replace(/ /g, ".") + '_DEFINITION\r\n');
 
     //writeCurves
     if (readStreams.length === 0) {
