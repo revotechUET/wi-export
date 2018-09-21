@@ -5,6 +5,7 @@ let async = require('async');
 let space = require('../space');
 let wiImport = require('wi-import');
 let hashDir = wiImport.hashDir;
+const MDCurve = '__MD';
 
 function writeVersion(lasFilePath) {
     fs.appendFileSync(lasFilePath, '~Version\r\n');
@@ -81,7 +82,7 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
     for (idCurve of idCurves) {
         let curve = dataset.curves.find(function (curve) { return curve.idCurve == idCurve });
         let line;
-        if(curve) {
+        if(curve && curve.name != MDCurve) {
             let stream;
             if (project) { //export from project
                 line = space.spaceAfter(12, curve.name) + '.' + space.spaceAfter(39, curve.unit) + ':\r\n';

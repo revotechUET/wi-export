@@ -5,6 +5,7 @@ let async = require('async');
 let space = require('../../space');
 let wiImport = require('wi-import');
 var csv = require('fast-csv');
+const MDCurve = '__MD';
 let hashDir = wiImport.hashDir;
 
 function writeHeader(csvStream, well) {
@@ -42,7 +43,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
 
     for (idCurve of idCurves) {
         let curve = dataset.curves.find(function (curve) { return curve.idCurve == idCurve });
-        if (curve) {
+        if (curve && curve.name != MDCurve) {
             let stream;
             curveNameArr.push(curve.name);
             let unit = curve.curve_revisions ? curve.curve_revisions[0].unit : curve.unit;
