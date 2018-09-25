@@ -40,18 +40,21 @@ function writeWellHeader(lasFilePath, well) {
     }
     fs.appendFileSync(lasFilePath, strtHeader + '\r\n' + stopHeader + '\r\n' + stepHeader + '\r\n');
     //append other headers
+    let nullHeader = space.spaceAfter(20, " " + 'NULL' + '.') + space.spaceAfter(36, '-999') + ": NULL VALUE\r\n";
+    fs.appendFileSync(lasFilePath, nullHeader);
+    
     let WELL_header = wellHeaders.find(function (h) { return h.value == 'WELL' });
-    let NULL_header = wellHeaders.find(function (h) { return h.value == 'NULL' });
+    // let NULL_header = wellHeaders.find(function (h) { return h.value == 'NULL' });
     if (!WELL_header) {
         let header = space.spaceAfter(20, " " + 'WELL' + '.') + space.spaceAfter(36, well.name) + ": " + 'WELL NAME' + '\r\n';
         fs.appendFileSync(lasFilePath, header);
     }
-    if (!NULL_header) {
-        let header = space.spaceAfter(20, " " + 'NULL' + '.') + space.spaceAfter(36, '-999.2500') + ": NULL VALUE\r\n";
-        fs.appendFileSync(lasFilePath, header);
-    }
+    // if (!NULL_header) {
+    //     let header = space.spaceAfter(20, " " + 'NULL' + '.') + space.spaceAfter(36, '-999') + ": NULL VALUE\r\n";
+    //     fs.appendFileSync(lasFilePath, header);
+    // }
     for (i in wellHeaders) {
-        if (wellHeaders[i].value && wellHeaders[i].header !== 'filename' && wellHeaders[i].header !== 'COMPANY' && wellHeaders[i].header !== 'STRT' && wellHeaders[i].header !== 'STOP' && wellHeaders[i].header !== 'STEP') {
+        if (wellHeaders[i].value && wellHeaders[i].header !== 'filename' && wellHeaders[i].header !== 'COMPANY' && wellHeaders[i].header !== 'STRT' && wellHeaders[i].header !== 'STOP' && wellHeaders[i].header !== 'STEP' && wellHeaders[i].header != 'NULL') {
             let header = space.spaceAfter(20, wellHeaders[i].header.toString() + '  .') + space.spaceAfter(36, wellHeaders[i].value) + ": " + wellHeaders[i].description + '\r\n';
             fs.appendFileSync(lasFilePath, header);
         }

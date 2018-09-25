@@ -38,18 +38,22 @@ function writeWellHeader(lasFilePath, well) {
     }
     fs.appendFileSync(lasFilePath, strtHeader + '\r\n' + stopHeader + '\r\n' + stepHeader + '\r\n');
     //append other headers
+
+    let nullHeader = space.spaceAfter(14, " " + 'NULL' + '.') + space.spaceAfter(24, '-999') + ": \r\n";
+    fs.appendFileSync(lasFilePath, nullHeader);
+
     let WELL_header = wellHeaders.find(function (h) { return h.value == 'WELL' });
-    let NULL_header = wellHeaders.find(function (h) { return h.value == 'NULL' });
+    // let NULL_header = wellHeaders.find(function (h) { return h.value == 'NULL' });
     if (!WELL_header) {
         let header = space.spaceAfter(14, " " + 'WELL' + '.') + space.spaceAfter(24, well.name) + ": " + 'WELL NAME' + '\r\n';
         fs.appendFileSync(lasFilePath, header);
     }
-    if (!NULL_header) {
-        let header = space.spaceAfter(14, " " + 'NULL' + '.') + space.spaceAfter(24, '-999.2500') + ": \r\n";
-        fs.appendFileSync(lasFilePath, header);
-    }
+    // if (!NULL_header) {
+    //     let header = space.spaceAfter(14, " " + 'NULL' + '.') + space.spaceAfter(24, '-999.2500') + ": \r\n";
+    //     fs.appendFileSync(lasFilePath, header);
+    // }
     for (i in wellHeaders) {
-        if (wellHeaders[i].value && wellHeaders[i].header !== 'filename' && wellHeaders[i].header !== 'STRT' && wellHeaders[i].header !== 'STOP' && wellHeaders[i].header !== 'STEP') {
+        if (wellHeaders[i].value && wellHeaders[i].header !== 'filename' && wellHeaders[i].header !== 'STRT' && wellHeaders[i].header !== 'STOP' && wellHeaders[i].header !== 'STEP' && wellHeaders[i].header !== 'NULL') {
             let header = space.spaceAfter(14, " " + wellHeaders[i].header.toString() + '.') + space.spaceAfter(24, wellHeaders[i].value) + ": " + wellHeaders[i].description + '\r\n';
             fs.appendFileSync(lasFilePath, header);
         }
@@ -89,8 +93,8 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                 let curvePath = await curveModel.getCurveKey(curve.curve_revisions[0]);
                 console.log('curvePath=========', curvePath);
                 try {
-                    stream = await s3.getData(curvePath);                    
-                } catch(e) {
+                    stream = await s3.getData(curvePath);
+                } catch (e) {
                     console.log('=============NOT FOUND CURVE FROM S3', e);
                     callback(e);
                 }
@@ -116,7 +120,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
     fs.appendFileSync(lasFilePath, '#MNEM.UNIT       Value                        Description\r\n');
     fs.appendFileSync(lasFilePath, '#---------       ---------                    -------------\r\n');
     fs.appendFileSync(lasFilePath, curveColumns + '\r\n');
-    
+
 
     // if (dataset.dataset_params) {
     //     for (param of dataset.dataset_params) {
@@ -157,7 +161,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                     // tokens = nullHeader ? nullHeader.value : '-999.0000';
                     tokens = '-999';
                 }
-                if(tokens != '-999')
+                if (tokens != '-999')
                     tokens = parseFloat(tokens).toFixed(4);
                 tokens = space.spaceBefore(18, tokens);
                 if (i === 0) {
