@@ -53,7 +53,7 @@ function writeWellHeader(lasFilePath, well) {
     //     fs.appendFileSync(lasFilePath, header);
     // }
     for (i in wellHeaders) {
-        if (wellHeaders[i].value && wellHeaders[i].header !== 'filename' && wellHeaders[i].header !== 'STRT' && wellHeaders[i].header !== 'STOP' && wellHeaders[i].header !== 'STEP' && wellHeaders[i].header !== 'NULL') {
+        if (wellHeaders[i].value && wellHeaders[i].header !== 'filename' && wellHeaders[i].header !== 'STRT' && wellHeaders[i].header !== 'STOP' && wellHeaders[i].header !== 'STEP' && wellHeaders[i].header !== 'NULL'&& wellHeaders[i].header !== 'WELL') {
             let header = space.spaceAfter(14, " " + wellHeaders[i].header.toString() + '.') + space.spaceAfter(24, wellHeaders[i].value) + ": " + wellHeaders[i].description + '\r\n';
             fs.appendFileSync(lasFilePath, header);
         }
