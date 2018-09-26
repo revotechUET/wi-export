@@ -42,12 +42,12 @@ function writeWellHeader(lasFilePath, well) {
     let nullHeader = space.spaceAfter(14, " " + 'NULL' + '.') + space.spaceAfter(24, '-999') + ": \r\n";
     fs.appendFileSync(lasFilePath, nullHeader);
 
-    let WELL_header = wellHeaders.find(function (h) { return h.value == 'WELL' });
+    // let WELL_header = wellHeaders.find(function (h) { return h.value == 'WELL' });
     // let NULL_header = wellHeaders.find(function (h) { return h.value == 'NULL' });
-    if (!WELL_header) {
-        let header = space.spaceAfter(14, " " + 'WELL' + '.') + space.spaceAfter(24, well.name) + ": " + 'WELL NAME' + '\r\n';
-        fs.appendFileSync(lasFilePath, header);
-    }
+    // if (!WELL_header) {
+    let wellHeader = space.spaceAfter(14, " " + 'WELL' + '.') + space.spaceAfter(24, well.name) + ": " + 'WELL NAME' + '\r\n';
+    fs.appendFileSync(lasFilePath, wellHeader);
+    // }
     // if (!NULL_header) {
     //     let header = space.spaceAfter(14, " " + 'NULL' + '.') + space.spaceAfter(24, '-999.2500') + ": \r\n";
     //     fs.appendFileSync(lasFilePath, header);
