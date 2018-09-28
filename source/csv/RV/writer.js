@@ -97,7 +97,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                     //     return header.header == "NULL";
                     // })
                     // tokens = nullHeader ? nullHeader.value : '-999.0000';
-                    tokens = '-999';
+                    tokens = '-9999';
                 }
                 if (i === 0) {
                     let depth = top.toFixed(4).toString();

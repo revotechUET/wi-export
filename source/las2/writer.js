@@ -39,7 +39,7 @@ function writeWellHeader(lasFilePath, well) {
     fs.appendFileSync(lasFilePath, strtHeader + '\r\n' + stopHeader + '\r\n' + stepHeader + '\r\n');
     //append other headers
 
-    let nullHeader = space.spaceAfter(14, " " + 'NULL' + '.') + space.spaceAfter(24, '-999') + ": \r\n";
+    let nullHeader = space.spaceAfter(14, " " + 'NULL' + '.') + space.spaceAfter(24, '-9999') + ": \r\n";
     fs.appendFileSync(lasFilePath, nullHeader);
 
     // let WELL_header = wellHeaders.find(function (h) { return h.value == 'WELL' });
@@ -159,9 +159,9 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                     //     return header.header == "NULL";
                     // })
                     // tokens = nullHeader ? nullHeader.value : '-999.0000';
-                    tokens = '-999';
+                    tokens = '-9999';
                 }
-                if (tokens != '-999')
+                if (tokens != '-9999')
                     tokens = parseFloat(tokens).toFixed(4);
                 tokens = space.spaceBefore(18, tokens);
                 if (i === 0) {
