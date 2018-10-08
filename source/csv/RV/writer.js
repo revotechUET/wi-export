@@ -92,7 +92,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                 readLine++;
                 let tokens = line.toString('utf8').split("||");
                 tokens = tokens.toString().substring(tokens.toString().indexOf(" ") + 1);
-                if (tokens == null || tokens == NaN || tokens == 'null' || tokens == 'NaN') {
+                if (tokens == null || tokens == NaN || tokens == 'null' || tokens == 'NaN' || !tokens) {
                     // let nullHeader = well.well_headers.find(header => {
                     //     return header.header == "NULL";
                     // })
