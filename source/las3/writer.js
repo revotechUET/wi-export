@@ -55,7 +55,7 @@ function writeWellHeader(lasFilePath, well) {
     // }
     for (i in wellHeaders) {
         if (wellHeaders[i].value && wellHeaders[i].header !== 'filename' && wellHeaders[i].header !== 'COMPANY' && wellHeaders[i].header !== 'STRT' && wellHeaders[i].header !== 'STOP' && wellHeaders[i].header !== 'STEP' && wellHeaders[i].header != 'NULL' && wellHeaders[i].header != 'WELL') {
-            let header = space.spaceAfter(20, wellHeaders[i].header.toString() + '  .') + space.spaceAfter(36, wellHeaders[i].value) + ": " + wellHeaders[i].description + '\r\n';
+            let header = space.spaceAfter(20, wellHeaders[i].header.toString() + '  .' + wellHeaders[i].unit) + space.spaceAfter(36, wellHeaders[i].value) + ": " + wellHeaders[i].description + '\r\n';
             fs.appendFileSync(lasFilePath, header);
         }
     }
@@ -65,11 +65,11 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
     fs.appendFileSync(lasFilePath, '\r\n~' + dataset.name.toUpperCase().replace(/ /g, ".") + '_PARAMETER\r\n');
     fs.appendFileSync(lasFilePath, '#MNEM.UNIT                    VALUE                        DESCRIPTION\r\n');
     fs.appendFileSync(lasFilePath, '#--------------- ---         ------------                 -----------------\r\n\r\n');
-    if (!project && dataset.dataset_params.length > 0) { //export from inventory
-        // for (param of dataset.dataset_params) {
-        //     let line = space.spaceAfter(16, param.mnem) + space.spaceAfter(14, '.') + space.spaceAfter(28, param.value) + ': ' + param.description + '\r\n';
-        //     fs.appendFileSync(lasFilePath, line);
-        // }
+    if (dataset.dataset_params && dataset.dataset_params.length > 0) {
+        for (param of dataset.dataset_params) {
+            let line = space.spaceAfter(16, param.mnem) + space.spaceAfter(14, '.' + param.unit) + space.spaceAfter(28, param.value) + ': ' + param.description + '\r\n';
+            fs.appendFileSync(lasFilePath, line);
+        }
     }
     fs.appendFileSync(lasFilePath, '\r\n\r\n~' + dataset.name.toUpperCase().replace(/ /g, ".") + '_DEFINITION\r\n');
     fs.appendFileSync(lasFilePath, '#MNEM.UNIT                 LOG CODE                  CURVE DESCRIPTION\r\n');
@@ -88,12 +88,12 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
         if (curve && curve.name != MDCurve) {
             let stream;
             if (project) { //export from project
-                line = space.spaceAfter(12, curve.name) + '.' + space.spaceAfter(39, curve.unit) + ':\r\n';
+                line = space.spaceAfter(12, curve.name) + '.' + space.spaceAfter(39, curve.unit) + ': ' + curve.description + '\r\n';
                 let curvePath = await hashDir.createPath(curveBasePath, project.createdBy + project.name + well.name + dataset.name + curve.name, curve.name + '.txt');
                 console.log('curvePath', curvePath);
                 stream = fs.createReadStream(curvePath);
             } else { //export from inventory
-                line = space.spaceAfter(12, curve.name) + '.' + space.spaceAfter(39, curve.curve_revisions[0].unit) + ':\r\n';
+                line = space.spaceAfter(12, curve.name) + '.' + space.spaceAfter(39, curve.curve_revisions[0].unit) + ': ' + curve.description + '\r\n';
                 let curvePath = await curveModel.getCurveKey(curve.curve_revisions[0]);
                 console.log('curvePath=========', curvePath);
                 try {
