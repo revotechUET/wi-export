@@ -8,7 +8,12 @@ let hashDir = wiImport.hashDir;
 const MDCurve = '__MD';
 const WHLEN1 = 14;
 const WHLEN2 = 24;
+let _unitTable = null;
 
+module.exports.setUnitTable = setUnitTable;
+function setUnitTable (unitTable) {
+    _unitTable = unitTable;
+}
 function writeVersion(lasFilePath) {
     fs.appendFileSync(lasFilePath, '~Version\r\n');
     fs.appendFileSync(lasFilePath, 'VERS .        2      : CWLS LAS Version 2.0 \r\n');
@@ -17,6 +22,31 @@ function writeVersion(lasFilePath) {
 
 function getWellUnit(well) {
     // TODO
+    let unitHeader = well.well_headers.find(function(header) {
+        return header.header == 'UNIT';
+    })
+    return unitHeader.value;
+}
+
+function convertUnit(value, fromUnit, destUnit) {
+    //todo
+    if(!_unitTable) return value;
+    let unitTable = _unitTable;
+
+    let startUnit = unitTable.find(u => u.name == fromUnit);
+    let endUnit = unitTable.find(u => u.name == destUnit);
+
+    // if(!startUnit || !endUnit || startUnit.idUnitGroup != endUnit.idUnitGroup)
+    //     return value;
+
+    if (startUnit && endUnit) {
+        let sCoeffs = JSON.parse(startUnit.rate);
+        let eCoeffs = JSON.parse(endUnit.rate);
+        return eCoeffs[0]* (value - sCoeffs[1])/sCoeffs[0] + eCoeffs[1];
+        //return value * endUnit.rate / startUnit.rate;
+    }
+   
+    return value;
 }
 
 function writeWellHeader(lasFilePath, well, dataset, from) {
@@ -101,9 +131,9 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
         well.username = project.createdBy;
     }
 
-    let top = Number.parseFloat(dataset.top);
-    let bottom = Number.parseFloat(dataset.bottom);
-    let step = Number.parseFloat(dataset.step);
+    let top = convertUnit(Number.parseFloat(dataset.top), 'M', dataset.unit);
+    let bottom = convertUnit(Number.parseFloat(dataset.bottom), 'M', dataset.unit);
+    let step = convertUnit(Number.parseFloat(dataset.step), 'M', dataset.unit);
     let readStreams = [];
     let writeStream = fs.createWriteStream(lasFilePath, { flags: 'a' });
     let curveColumns = '~A        DEPTH';

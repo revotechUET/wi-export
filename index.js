@@ -1,9 +1,14 @@
 let async = require('async');
 let las2Writer = require('./source/las2/writer');
+
 let las3Writer = require('./source/las3/writer');
 let csvRVWriter = require('./source/csv/RV/writer');
 let csvWDRVWriter = require('./source/csv/WDRV/writer');
 
+module.exports.setUnitTable = setUnitTable;
+function setUnitTable (unitTable) {
+    las2Writer.setUnitTable(unitTable);
+}
 //from inventory
 module.exports.exportLas2FromInventory = function (well, datasetObjs, exportPath, s3, curveModel, username, callback) {
     async.map(datasetObjs, function (item, cb) {
