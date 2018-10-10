@@ -58,36 +58,49 @@ function writeWellHeader(lasFilePath, well, dataset, from) {
     let stopHeader;
     let stepHeader;
     let wellUnit = dataset.unit || getWellUnit(well) || 'M';
-    for (let i in wellHeaders) {
-        if (wellHeaders[i].header === 'STRT' && !strtHeader) {
-            strtHeader = space.spaceAfter(WHLEN1, 'STRT.' + wellUnit);
-            let topValue = dataset.top || wellHeaders[i].value;
-            if (from == 'project')
-                topValue = convertUnit(Number.parseFloat(topValue), 'M', wellUnit);
-            strtHeader += space.spaceAfter(WHLEN2, topValue) + ": " + wellHeaders[i].description;
-        }
-        if (wellHeaders[i].header === 'TOP' && !strtHeader) {
-            strtHeader = space.spaceAfter(WHLEN1, 'TOP.' + wellUnit);
-            let topValue = dataset.top || wellHeaders[i].value;
-            if (from == 'project')``
-                topValue = convertUnit(topValue, 'M', wellUnit);
-            strtHeader += space.spaceAfter(WHLEN2, topValue) + ": " + wellHeaders[i].description;
-        }
-        if (wellHeaders[i].header === 'STOP') {
-            stopHeader = space.spaceAfter(WHLEN1, 'STOP.' + wellUnit);
-            let stopValue = dataset.bottom || wellHeaders[i].value;
-            if (from == 'project')
-                stopValue = convertUnit(stopValue, 'M', wellUnit);
-            stopHeader += space.spaceAfter(WHLEN2, stopValue) + ": " + wellHeaders[i].description;
-        }
-        if (wellHeaders[i].header === 'STEP') {
-            stepHeader = space.spaceAfter(WHLEN1, 'STEP.' + wellUnit);
-            let stepValue = dataset.step || wellHeaders[i].value;
-            if (from == 'project')
-                stepValue = convertUnit(stepValue, 'M', wellUnit);
-            stepHeader += space.spaceAfter(WHLEN2, stepValue) + ": " + wellHeaders[i].description;
-        }
-    }
+
+    strtHeader = space.spaceAfter(WHLEN1, 'STRT.' + wellUnit);
+    let topValue = from == 'inventory' ? dataset.top : convertUnit(Number.parseFloat(dataset.top), 'M', wellUnit);
+    strtHeader += space.spaceAfter(WHLEN2, topValue) + ": Top Depth";
+
+    stopHeader = space.spaceAfter(WHLEN1, 'STOP.' + wellUnit);
+    let bottomValue = from == 'inventory' ? dataset.bottom : convertUnit(Number.parseFloat(dataset.bottom), 'M', wellUnit);
+    stopHeader += space.spaceAfter(WHLEN2, bottomValue) + ": Top Depth";
+
+    stepHeader = space.spaceAfter(WHLEN1, 'STRT.' + wellUnit);
+    let stepValue = from == 'inventory' ? dataset.step : convertUnit(Number.parseFloat(dataset.step), 'M', wellUnit);
+    stepHeader += space.spaceAfter(WHLEN2, stepValue) + ": Top Depth";
+
+    // for (let i in wellHeaders) {
+    //     if (wellHeaders[i].header === 'STRT' && !strtHeader) {
+    //         strtHeader = space.spaceAfter(WHLEN1, 'STRT.' + wellUnit);
+    //         let topValue = dataset.top || wellHeaders[i].value;
+    //         if (from == 'project')
+    //             topValue = convertUnit(Number.parseFloat(topValue), 'M', wellUnit);
+    //         strtHeader += space.spaceAfter(WHLEN2, topValue) + ": " + wellHeaders[i].description;
+    //     }
+    //     if (wellHeaders[i].header === 'TOP' && !strtHeader) {
+    //         strtHeader = space.spaceAfter(WHLEN1, 'TOP.' + wellUnit);
+    //         let topValue = dataset.top || wellHeaders[i].value;
+    //         if (from == 'project')``
+    //             topValue = convertUnit(topValue, 'M', wellUnit);
+    //         strtHeader += space.spaceAfter(WHLEN2, topValue) + ": " + wellHeaders[i].description;
+    //     }
+    //     if (wellHeaders[i].header === 'STOP') {
+    //         stopHeader = space.spaceAfter(WHLEN1, 'STOP.' + wellUnit);
+    //         let stopValue = dataset.bottom || wellHeaders[i].value;
+    //         if (from == 'project')
+    //             stopValue = convertUnit(stopValue, 'M', wellUnit);
+    //         stopHeader += space.spaceAfter(WHLEN2, stopValue) + ": " + wellHeaders[i].description;
+    //     }
+    //     if (wellHeaders[i].header === 'STEP') {
+    //         stepHeader = space.spaceAfter(WHLEN1, 'STEP.' + wellUnit);
+    //         let stepValue = dataset.step || wellHeaders[i].value;
+    //         if (from == 'project')
+    //             stepValue = convertUnit(stepValue, 'M', wellUnit);
+    //         stepHeader += space.spaceAfter(WHLEN2, stepValue) + ": " + wellHeaders[i].description;
+    //     }
+    // }
     fs.appendFileSync(lasFilePath, strtHeader + '\r\n' + stopHeader + '\r\n' + stepHeader + '\r\n');
     //append other headers
 
