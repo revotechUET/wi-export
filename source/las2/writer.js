@@ -65,11 +65,11 @@ function writeWellHeader(lasFilePath, well, dataset, from) {
 
     stopHeader = space.spaceAfter(WHLEN1, 'STOP.' + wellUnit);
     let bottomValue = from == 'inventory' ? dataset.bottom : convertUnit(Number.parseFloat(dataset.bottom), 'M', wellUnit);
-    stopHeader += space.spaceAfter(WHLEN2, bottomValue) + ": Top Depth";
+    stopHeader += space.spaceAfter(WHLEN2, bottomValue) + ": Bottom Depth";
 
     stepHeader = space.spaceAfter(WHLEN1, 'STRT.' + wellUnit);
     let stepValue = from == 'inventory' ? dataset.step : convertUnit(Number.parseFloat(dataset.step), 'M', wellUnit);
-    stepHeader += space.spaceAfter(WHLEN2, stepValue) + ": Top Depth";
+    stepHeader += space.spaceAfter(WHLEN2, stepValue) + ": Step";
 
     // for (let i in wellHeaders) {
     //     if (wellHeaders[i].header === 'STRT' && !strtHeader) {
