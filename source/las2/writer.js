@@ -45,7 +45,6 @@ function convertUnit(value, fromUnit, destUnit) {
         return eCoeffs[0]* (value - sCoeffs[1])/sCoeffs[0] + eCoeffs[1];
         //return value * endUnit.rate / startUnit.rate;
     }
-   
     return value;
 }
 
@@ -64,13 +63,13 @@ function writeWellHeader(lasFilePath, well, dataset, from) {
             strtHeader = space.spaceAfter(WHLEN1, 'STRT.' + wellUnit);
             let topValue = dataset.top || wellHeaders[i].value;
             if (from == 'project')
-                topValue = convertUnit(topValue, 'M', wellUnit);
+                topValue = convertUnit(Number.parseFloat(topValue), 'M', wellUnit);
             strtHeader += space.spaceAfter(WHLEN2, topValue) + ": " + wellHeaders[i].description;
         }
         if (wellHeaders[i].header === 'TOP' && !strtHeader) {
             strtHeader = space.spaceAfter(WHLEN1, 'TOP.' + wellUnit);
             let topValue = dataset.top || wellHeaders[i].value;
-            if (from == 'project')
+            if (from == 'project')``
                 topValue = convertUnit(topValue, 'M', wellUnit);
             strtHeader += space.spaceAfter(WHLEN2, topValue) + ": " + wellHeaders[i].description;
         }
@@ -107,7 +106,7 @@ function writeWellHeader(lasFilePath, well, dataset, from) {
     // }
     for (i in wellHeaders) {
         if (wellHeaders[i].value && wellHeaders[i].header !== 'filename' && wellHeaders[i].header !== 'STRT' && wellHeaders[i].header !== 'STOP' && wellHeaders[i].header !== 'STEP' && wellHeaders[i].header !== 'NULL' && wellHeaders[i].header !== 'WELL') {
-            let header = space.spaceAfter(WHLEN1, " " + wellHeaders[i].header.toString() + '.' + wellUnit) + space.spaceAfter(WHLEN2, wellHeaders[i].value) + ": " + wellHeaders[i].description + '\r\n';
+            let header = space.spaceAfter(WHLEN1, " " + wellHeaders[i].header.toString() + '.' + wellHeaders[i].unit) + space.spaceAfter(WHLEN2, wellHeaders[i].value) + ": " + wellHeaders[i].description + '\r\n';
             fs.appendFileSync(lasFilePath, header);
         }
     }
