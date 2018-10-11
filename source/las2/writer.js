@@ -56,15 +56,15 @@ function writeWellHeader(lasFilePath, well, dataset, from) {
 
     strtHeader = space.spaceAfter(WHLEN1, 'STRT.' + wellUnit);
     let topValue = from == 'inventory' ? dataset.top : convertUnit(Number.parseFloat(dataset.top), 'M', wellUnit);
-    strtHeader += space.spaceAfter(WHLEN2, topValue.toFixed(4)) + ": Top Depth";
+    strtHeader += space.spaceAfter(WHLEN2, Number.parseFloat(topValue).toFixed(4)) + ": Top Depth";
 
     stopHeader = space.spaceAfter(WHLEN1, 'STOP.' + wellUnit);
     let bottomValue = from == 'inventory' ? dataset.bottom : convertUnit(Number.parseFloat(dataset.bottom), 'M', wellUnit);
-    stopHeader += space.spaceAfter(WHLEN2, bottomValue.toFixed(4)) + ": Bottom Depth";
+    stopHeader += space.spaceAfter(WHLEN2, Number.parseFloat(bottomValue).toFixed(4)) + ": Bottom Depth";
 
     stepHeader = space.spaceAfter(WHLEN1, 'STEP.' + wellUnit);
     let stepValue = from == 'inventory' ? dataset.step : convertUnit(Number.parseFloat(dataset.step), 'M', wellUnit);
-    stepHeader += space.spaceAfter(WHLEN2, stepValue.toFixed(4)) + ": Step";
+    stepHeader += space.spaceAfter(WHLEN2, Number.parseFloat(stepValue).toFixed(4)) + ": Step";
 
     fs.appendFileSync(lasFilePath, strtHeader + '\r\n' + stopHeader + '\r\n' + stepHeader + '\r\n');
     //append other headers
