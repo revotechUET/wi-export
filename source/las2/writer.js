@@ -53,21 +53,17 @@ function writeWellHeader(lasFilePath, well, dataset, from) {
     let stopHeader;
     let stepHeader;
     let wellUnit = dataset.unit || getWellUnit(well) || 'M';
-    let desUnit = wellUnit;
-    if(from == 'inventory') {
-        desUnit = 'M';
-    }
 
     strtHeader = space.spaceAfter(WHLEN1, 'STRT.' + wellUnit);
-    let topValue = from == 'inventory' ? dataset.top : convertUnit(Number.parseFloat(dataset.top), 'M', desUnit);
+    let topValue = from == 'inventory' ? dataset.top : convertUnit(Number.parseFloat(dataset.top), 'M', wellUnit);
     strtHeader += space.spaceAfter(WHLEN2, topValue) + ": Top Depth";
 
     stopHeader = space.spaceAfter(WHLEN1, 'STOP.' + wellUnit);
-    let bottomValue = from == 'inventory' ? dataset.bottom : convertUnit(Number.parseFloat(dataset.bottom), 'M', desUnit);
+    let bottomValue = from == 'inventory' ? dataset.bottom : convertUnit(Number.parseFloat(dataset.bottom), 'M', wellUnit);
     stopHeader += space.spaceAfter(WHLEN2, bottomValue) + ": Bottom Depth";
 
     stepHeader = space.spaceAfter(WHLEN1, 'STEP.' + wellUnit);
-    let stepValue = from == 'inventory' ? dataset.step : convertUnit(Number.parseFloat(dataset.step), 'M', desUnit);
+    let stepValue = from == 'inventory' ? dataset.step : convertUnit(Number.parseFloat(dataset.step), 'M', wellUnit);
     stepHeader += space.spaceAfter(WHLEN2, stepValue) + ": Step";
 
     fs.appendFileSync(lasFilePath, strtHeader + '\r\n' + stopHeader + '\r\n' + stepHeader + '\r\n');
@@ -107,17 +103,15 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
     fs.appendFileSync(lasFilePath, '#--------        --------------      -----    -------------------\r\n');
     fs.appendFileSync(lasFilePath, 'DEPTH.M  :\r\n');
 
-    let desUnit = dataset.unit;
 
     if (!well) {  //export from project
         well = project.wells[0];
         well.username = project.createdBy;
-        desUnit = 'M'
     }
 
-    let top = convertUnit(Number.parseFloat(dataset.top), 'M', desUnit);
-    let bottom = convertUnit(Number.parseFloat(dataset.bottom), 'M', desUnit);
-    let step = convertUnit(Number.parseFloat(dataset.step), 'M', desUnit);
+    let top = convertUnit(Number.parseFloat(dataset.top), 'M', dataset.unit);
+    let bottom = convertUnit(Number.parseFloat(dataset.bottom), 'M', dataset.unit);
+    let step = convertUnit(Number.parseFloat(dataset.step), 'M', dataset.unit);
     let readStreams = [];
     let writeStream = fs.createWriteStream(lasFilePath, { flags: 'a' });
     let curveColumns = '~A        DEPTH';

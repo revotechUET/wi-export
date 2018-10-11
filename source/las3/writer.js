@@ -6,6 +6,7 @@ let space = require('../space');
 let wiImport = require('wi-import');
 let hashDir = wiImport.hashDir;
 const MDCurve = '__MD';
+let _unitTable = null;
 
 module.exports.setUnitTable = setUnitTable;
 function setUnitTable (unitTable) {

@@ -7,6 +7,7 @@ let wiImport = require('wi-import');
 var csv = require('fast-csv');
 const MDCurve = '__MD';
 let hashDir = wiImport.hashDir;
+let _unitTable = null;
 
 module.exports.setUnitTable = setUnitTable;
 function setUnitTable (unitTable) {
