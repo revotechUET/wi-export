@@ -49,7 +49,7 @@ function writeWellHeader(lasFilePath, well) {
     strtHeader += space.spaceAfter(36, Number.parseFloat(getWellTopDepth(well)).toFixed(4)) + ": Top Depth";
     stopHeader += space.spaceAfter(36, Number.parseFloat(getWellBottomDepth(well)).toFixed(4)) + ": Bottom Depth";
     stepHeader += space.spaceAfter(36, Number.parseFloat(getWellStep(well)).toFixed(4)) + ": Step";
-    totalHeader += stepHeader += space.spaceAfter(36, (Number.parseFloat(getWellBottomDepth(well)) - Number.parseFloat(getWellTopDepth(well)) .toFixed(4))) + ": Total Depth";
+    totalHeader += space.spaceAfter(36, ( Number.parseFloat(getWellBottomDepth(well)) - Number.parseFloat(getWellTopDepth(well)) .toFixed(4))) + ": Total Depth";
  
     fs.appendFileSync(lasFilePath, strtHeader + '\r\n' + stopHeader + '\r\n' + stepHeader + '\r\n' + totalHeader + '\r\n');
     //append other headers
@@ -60,7 +60,7 @@ function writeWellHeader(lasFilePath, well) {
     fs.appendFileSync(lasFilePath, wellHeader);
    
     for (i in wellHeaders) {
-        if (wellHeaders[i].value && wellHeaders[i].header !== 'filename' && wellHeaders[i].header !== 'COMPANY' && wellHeaders[i].header !== 'STRT' && wellHeaders[i].header !== 'STOP' && wellHeaders[i].header !== 'STEP' && wellHeaders[i].header != 'NULL' && wellHeaders[i].header != 'WELL') {
+        if (wellHeaders[i].value && wellHeaders[i].header !== 'filename' && wellHeaders[i].header !== 'COMPANY' && wellHeaders[i].header !== 'STRT' && wellHeaders[i].header !== 'STOP' && wellHeaders[i].header !== 'STEP' && wellHeaders[i].header != 'NULL' && wellHeaders[i].header != 'WELL' && wellHeaders[i].header != 'TOTAL DEPTH') {
             let header = space.spaceAfter(20, wellHeaders[i].header.toString() + '  .' + wellHeaders[i].unit) + space.spaceAfter(36, wellHeaders[i].value) + ": " + wellHeaders[i].description + '\r\n';
             fs.appendFileSync(lasFilePath, header);
         }
