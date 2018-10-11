@@ -66,7 +66,11 @@ function writeWellHeader(lasFilePath, well, dataset, from) {
     let stepValue = from == 'inventory' ? dataset.step : convertUnit(Number.parseFloat(dataset.step), 'M', wellUnit);
     stepHeader += space.spaceAfter(WHLEN2, Number.parseFloat(stepValue).toFixed(4)) + ": Step";
 
-    fs.appendFileSync(lasFilePath, strtHeader + '\r\n' + stopHeader + '\r\n' + stepHeader + '\r\n');
+    totalHeader = space.spaceAfter(WHLEN1, 'TOTAL DEPTH.' + wellUnit);
+    let totalValue = Number.parseFloat(bottomValue) - Number.parseFloat(topValue);
+    totalHeader += space.spaceAfter(WHLEN2, Number.parseFloat(totalValue).toFixed(4)) + ": Total Depth";
+
+    fs.appendFileSync(lasFilePath, strtHeader + '\r\n' + stopHeader + '\r\n' + stepHeader + '\r\n' + totalHeader + '\r\n');
     //append other headers
 
     let nullHeader = space.spaceAfter(WHLEN1, " " + 'NULL' + '.') + space.spaceAfter(WHLEN2, '-9999') + ": \r\n";
