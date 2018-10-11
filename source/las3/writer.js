@@ -49,7 +49,9 @@ function writeWellHeader(lasFilePath, well) {
     strtHeader += space.spaceAfter(36, Number.parseFloat(getWellTopDepth(well)).toFixed(4)) + ": Top Depth";
     stopHeader += space.spaceAfter(36, Number.parseFloat(getWellBottomDepth(well)).toFixed(4)) + ": Bottom Depth";
     stepHeader += space.spaceAfter(36, Number.parseFloat(getWellStep(well)).toFixed(4)) + ": Step";
-    totalHeader += space.spaceAfter(36, ( Number.parseFloat(getWellBottomDepth(well)) - Number.parseFloat(getWellTopDepth(well)) .toFixed(4))) + ": Total Depth";
+    totalHeader += space.spaceAfter(36, 
+                                        ( Number.parseFloat(getWellBottomDepth(well)) - 
+                                            Number.parseFloat(getWellTopDepth(well))) .toFixed(4)) + ": Total Depth";
  
     fs.appendFileSync(lasFilePath, strtHeader + '\r\n' + stopHeader + '\r\n' + stepHeader + '\r\n' + totalHeader + '\r\n');
     //append other headers
