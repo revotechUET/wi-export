@@ -8,6 +8,25 @@ let wiImport = require('wi-import');
 const MDCurve = '__MD';
 let hashDir = wiImport.hashDir;
 
+module.exports.setUnitTable = setUnitTable;
+function setUnitTable (unitTable) {
+    _unitTable = unitTable;
+}
+
+
+function convertUnit(value, fromUnit, desUnit) {
+    //todo
+    if(!_unitTable) return value;
+    let unitTable = _unitTable;
+    let fromRate = unitTable[fromUnit];
+    let desRate = unitTable[desUnit];
+    if (fromRate && desRate) {
+        
+        return value * desRate / fromRate;
+    }
+    return value;
+}
+
 function writeHeader(csvStream, well, idCurves) {
     console.log('---------idCurves', idCurves);
     let headerArr = ['$Csv :WELL ', 'Dataset'];
@@ -39,9 +58,13 @@ function writeHeader(csvStream, well, idCurves) {
 
 async function writeDataset(csvStream, writeStream, project, well, dataset, idCurves, numOfPreCurve, s3, curveModel, curveBasePath, callback) {
 
-    let top = Number.parseFloat(dataset.top);
-    let bottom = Number.parseFloat(dataset.bottom);
-    let step = Number.parseFloat(dataset.step);
+    let desUnit = dataset.unit || 'M';
+    if(!project) {
+        desUnit = 'M';
+    }
+    let top = convertUnit(Number.parseFloat(dataset.top), 'M', desUnit);
+    let bottom = convertUnit(Number.parseFloat(dataset.bottom), 'M', desUnit);
+    let step = convertUnit(Number.parseFloat(dataset.step), 'M', desUnit);
     let readStreams = [];
 
     for (idCurve of idCurves) {
@@ -66,7 +89,7 @@ async function writeDataset(csvStream, writeStream, project, well, dataset, idCu
         }
     }
 
-    if (readStreams.length === 0) {
+    if (readStreams.length === 0 || idCurves.length == 0) {
         console.log('hiuhiu');
         for (let i = top; i < bottom + step; i += step) {
             let lineArr = generateLineArr(well.name, dataset.name, i.toFixed(4), numOfPreCurve);

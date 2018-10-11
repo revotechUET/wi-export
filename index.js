@@ -6,8 +6,13 @@ let csvRVWriter = require('./source/csv/RV/writer');
 let csvWDRVWriter = require('./source/csv/WDRV/writer');
 
 module.exports.setUnitTable = setUnitTable;
-function setUnitTable (unitTable) {
+function setUnitTable (unitTable, callback) {
     las2Writer.setUnitTable(unitTable);
+    las3Writer.setUnitTable(unitTable);
+    csvRVWriter.setUnitTable(unitTable);
+    csvWDRVWriter.setUnitTable(unitTable);
+
+    if(callback) callback();
 }
 //from inventory
 module.exports.exportLas2FromInventory = function (well, datasetObjs, exportPath, s3, curveModel, username, callback) {

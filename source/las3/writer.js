@@ -7,6 +7,25 @@ let wiImport = require('wi-import');
 let hashDir = wiImport.hashDir;
 const MDCurve = '__MD';
 
+module.exports.setUnitTable = setUnitTable;
+function setUnitTable (unitTable) {
+    _unitTable = unitTable;
+}
+
+
+function convertUnit(value, fromUnit, desUnit) {
+    //todo
+    if(!_unitTable) return value;
+    let unitTable = _unitTable;
+    let fromRate = unitTable[fromUnit];
+    let desRate = unitTable[desUnit];
+    if (fromRate && desRate) {
+        
+        return value * desRate / fromRate;
+    }
+    return value;
+}
+
 function writeVersion(lasFilePath) {
     fs.appendFileSync(lasFilePath, '~Version\r\n');
     fs.appendFileSync(lasFilePath, 'VERS  .             3.00                                : CWLS LOG ASCII STANDARD - VERSION 3.00\r\n');
@@ -21,38 +40,22 @@ function writeWellHeader(lasFilePath, well) {
     fs.appendFileSync(lasFilePath, '#MNEM.UNIT          DATA                                DESCRIPTION\r\n');
     fs.appendFileSync(lasFilePath, '#----- ----        -----------------                   -----------\r\n');
     //append start depth, stop depth and step
-    let strtHeader = space.spaceAfter(20, 'STRT  .M');
-    let stopHeader = space.spaceAfter(20, 'STOP  .M');
-    let stepHeader = space.spaceAfter(20, 'STEP  .M');
-    for (i in wellHeaders) {
-        if (wellHeaders[i].header === 'STRT' && strtHeader == space.spaceAfter(20, 'STRT  .M')) {
-            strtHeader += space.spaceAfter(36, wellHeaders[i].value) + ":" + wellHeaders[i].description;
-        }
-        if (wellHeaders[i].header === 'TOP' && strtHeader == space.spaceAfter(20, 'STRT  .M')) {
-            strtHeader += space.spaceAfter(36, wellHeaders[i].value) + ":" + wellHeaders[i].description;
-        }
-        if (wellHeaders[i].header === 'STOP') {
-            stopHeader += space.spaceAfter(36, wellHeaders[i].value) + ":" + wellHeaders[i].description;
-        }
-        if (wellHeaders[i].header === 'STEP') {
-            stepHeader += space.spaceAfter(36, wellHeaders[i].value) + ":" + wellHeaders[i].description;
-        }
-    }
+    let wellUnit = well.unit || 'M';
+    let strtHeader = space.spaceAfter(20, 'STRT  .' + wellUnit);
+    let stopHeader = space.spaceAfter(20, 'STOP  .' + wellUnit);
+    let stepHeader = space.spaceAfter(20, 'STEP  .' + wellUnit);
+    strtHeader += space.spaceAfter(36, getWellTopDepth(well)) + ": Top Depth";
+    stopHeader += space.spaceAfter(36, getWellBottomDepth(well)) + ": Bottom Depth";
+    stepHeader += space.spaceAfter(36, getWellStep(well)) + ": Step";
+ 
     fs.appendFileSync(lasFilePath, strtHeader + '\r\n' + stopHeader + '\r\n' + stepHeader + '\r\n');
     //append other headers
     let nullHeader = space.spaceAfter(20, " " + 'NULL' + '.') + space.spaceAfter(36, '-9999') + ": NULL VALUE\r\n";
     fs.appendFileSync(lasFilePath, nullHeader);
 
-    // let WELL_header = wellHeaders.find(function (h) { return h.value == 'WELL' });
-    // if (!WELL_header) {
     let wellHeader = space.spaceAfter(20, " " + 'WELL' + '.') + space.spaceAfter(36, well.name) + ": " + 'WELL NAME' + '\r\n';
     fs.appendFileSync(lasFilePath, wellHeader);
-    // }
-    // let NULL_header = wellHeaders.find(function (h) { return h.value == 'NULL' });
-    // if (!NULL_header) {
-    //     let header = space.spaceAfter(20, " " + 'NULL' + '.') + space.spaceAfter(36, '-999') + ": NULL VALUE\r\n";
-    //     fs.appendFileSync(lasFilePath, header);
-    // }
+   
     for (i in wellHeaders) {
         if (wellHeaders[i].value && wellHeaders[i].header !== 'filename' && wellHeaders[i].header !== 'COMPANY' && wellHeaders[i].header !== 'STRT' && wellHeaders[i].header !== 'STOP' && wellHeaders[i].header !== 'STEP' && wellHeaders[i].header != 'NULL' && wellHeaders[i].header != 'WELL') {
             let header = space.spaceAfter(20, wellHeaders[i].header.toString() + '  .' + wellHeaders[i].unit) + space.spaceAfter(36, wellHeaders[i].value) + ": " + wellHeaders[i].description + '\r\n';
@@ -62,7 +65,7 @@ function writeWellHeader(lasFilePath, well) {
 }
 
 async function writeDataset(lasFilePath, fileName, project, well, dataset, idCurves, s3, curveModel, curveBasePath, callback) {
-    fs.appendFileSync(lasFilePath, '\r\n~' + dataset.name.toUpperCase().replace(/ /g, ".") + '_PARAMETER\r\n');
+    fs.appendFileSync(lasFilePath, '\r\n~' + dataset.name.toUpperCase().replace(/ /g, ".").replace(/_DATA/,"") + '_PARAMETER\r\n');
     fs.appendFileSync(lasFilePath, '#MNEM.UNIT                    VALUE                        DESCRIPTION\r\n');
     fs.appendFileSync(lasFilePath, '#--------------- ---         ------------                 -----------------\r\n\r\n');
     if (dataset.dataset_params && dataset.dataset_params.length > 0) {
@@ -71,14 +74,18 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
             fs.appendFileSync(lasFilePath, line);
         }
     }
-    fs.appendFileSync(lasFilePath, '\r\n\r\n~' + dataset.name.toUpperCase().replace(/ /g, ".") + '_DEFINITION\r\n');
+    fs.appendFileSync(lasFilePath, '\r\n\r\n~' + dataset.name.toUpperCase().replace(/ /g, ".").replace(/_DATA/,"") + '_DEFINITION\r\n');
     fs.appendFileSync(lasFilePath, '#MNEM.UNIT                 LOG CODE                  CURVE DESCRIPTION\r\n');
     fs.appendFileSync(lasFilePath, '#----------- ----         ------------              -----------------\r\n\r\n');
     fs.appendFileSync(lasFilePath, 'DEPTH       .M                                      : Depth    {F}\r\n');
 
-    let top = Number.parseFloat(dataset.top);
-    let bottom = Number.parseFloat(dataset.bottom);
-    let step = Number.parseFloat(dataset.step);
+    let desUnit = dataset.unit || 'M';
+    if(!project) {
+        desUnit = 'M';
+    }
+    let top = convertUnit(Number.parseFloat(dataset.top), 'M', desUnit);
+    let bottom = convertUnit(Number.parseFloat(dataset.bottom),'M', desUnit);
+    let step = convertUnit(Number.parseFloat(dataset.step), 'M', desUnit);
     let readStreams = [];
     let writeStream = fs.createWriteStream(lasFilePath, { flags: 'a' })
 
@@ -108,10 +115,10 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
             fs.appendFileSync(lasFilePath, line);
         }
     }
-    fs.appendFileSync(lasFilePath, '\r\n\r\n' + '~' + dataset.name.replace(/ /g, ".") + '_DATA | ' + dataset.name.replace(/ /g, ".") + '_DEFINITION\r\n');
+    fs.appendFileSync(lasFilePath, '\r\n\r\n' + '~' + dataset.name.replace(/ /g, ".").replace(/_DATA/,"") + '_DATA | ' + dataset.name.replace(/ /g, ".") + '_DEFINITION\r\n');
 
     //writeCurves
-    if (readStreams.length === 0) {
+    if (readStreams.length === 0 || idCurves.length == 0) {
         console.log('hiuhiu', top, bottom, step);
         for (let i = top; i < bottom + step; i += step) {
             writeStream.write(space.spaceBefore(15, i.toFixed(2)) + '\r\n', function () {
@@ -248,6 +255,21 @@ function writeAll(exportPath, project, well, datasetObjs, username, s3, curveMod
             callback(null, rs[0]);
         }
     });
+}
+
+function getWellTopDepth (well) {
+    let datasets = well.datasets;
+    return Math.min(...datasets.map(d => +d.top));
+}
+
+function getWellBottomDepth (well) {
+    let datasets = well.datasets;
+    return Math.max(...datasets.map(d => +d.bottom));
+}
+
+function getWellStep (well) {
+    let datasets = well.datasets;
+    return datasets[0] ? datasets[0].step : 0;
 }
 
 module.exports.writeAll = writeAll;

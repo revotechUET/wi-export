@@ -8,6 +8,25 @@ var csv = require('fast-csv');
 const MDCurve = '__MD';
 let hashDir = wiImport.hashDir;
 
+module.exports.setUnitTable = setUnitTable;
+function setUnitTable (unitTable) {
+    _unitTable = unitTable;
+}
+
+
+function convertUnit(value, fromUnit, desUnit) {
+    //todo
+    if(!_unitTable) return value;
+    let unitTable = _unitTable;
+    let fromRate = unitTable[fromUnit];
+    let desRate = unitTable[desUnit];
+    if (fromRate && desRate) {
+        
+        return value * desRate / fromRate;
+    }
+    return value;
+}
+
 function writeHeader(csvStream, well) {
     let headerArr = ['$Csv : ']
     headerArr.push(well.name)
@@ -22,14 +41,17 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
     /*export from project
         well, s3, curveModel are null
     */
-    if (!well) {  //export from project
+   let desUnit = dataset.unit;
+    if (project) {  //export from project
         well = project.wells[0];
         well.username = project.createdBy;
     }
+    if(!project) 
+        desUnit = 'M';
 
-    let top = Number.parseFloat(dataset.top);
-    let bottom = Number.parseFloat(dataset.bottom);
-    let step = Number.parseFloat(dataset.step);
+    let top = convertUnit(Number.parseFloat(dataset.top), 'M', desUnit);
+    let bottom = convertUnit(Number.parseFloat(dataset.bottom), 'M', desUnit);
+    let step = convertUnit(Number.parseFloat(dataset.step), 'M', desUnit);
     let readStreams = [];
     var csvStream = csv.createWriteStream({ headers: false });
     let writeStream = fs.createWriteStream(lasFilePath, { flags: 'a' });
@@ -66,7 +88,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
         }
     }
 
-    if (readStreams.length === 0) {
+    if (readStreams.length === 0 || idCurves.length == 0) {
         console.log('hiuhiu');
         csvStream.write(curveNameArr);
         csvStream.write(curveUnitArr);

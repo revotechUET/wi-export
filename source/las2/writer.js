@@ -14,6 +14,21 @@ module.exports.setUnitTable = setUnitTable;
 function setUnitTable (unitTable) {
     _unitTable = unitTable;
 }
+
+
+function convertUnit(value, fromUnit, desUnit) {
+    //todo
+    if(!_unitTable) return value;
+    let unitTable = _unitTable;
+    let fromRate = unitTable[fromUnit];
+    let desRate = unitTable[desUnit];
+    if (fromRate && desRate) {
+        
+        return value * desRate / fromRate;
+    }
+    return value;
+}
+
 function writeVersion(lasFilePath) {
     fs.appendFileSync(lasFilePath, '~Version\r\n');
     fs.appendFileSync(lasFilePath, 'VERS .        2      : CWLS LAS Version 2.0 \r\n');
@@ -28,26 +43,6 @@ function getWellUnit(well) {
     return unitHeader.value;
 }
 
-function convertUnit(value, fromUnit, destUnit) {
-    //todo
-    if(!_unitTable) return value;
-    let unitTable = _unitTable;
-
-    let startUnit = unitTable.find(u => u.name == fromUnit);
-    let endUnit = unitTable.find(u => u.name == destUnit);
-
-    // if(!startUnit || !endUnit || startUnit.idUnitGroup != endUnit.idUnitGroup)
-    //     return value;
-
-    if (startUnit && endUnit) {
-        let sCoeffs = JSON.parse(startUnit.rate);
-        let eCoeffs = JSON.parse(endUnit.rate);
-        return eCoeffs[0]* (value - sCoeffs[1])/sCoeffs[0] + eCoeffs[1];
-        //return value * endUnit.rate / startUnit.rate;
-    }
-    return value;
-}
-
 function writeWellHeader(lasFilePath, well, dataset, from) {
     let wellHeaders = well.well_headers;
     fs.appendFileSync(lasFilePath, '~Well\r\n');
@@ -58,49 +53,23 @@ function writeWellHeader(lasFilePath, well, dataset, from) {
     let stopHeader;
     let stepHeader;
     let wellUnit = dataset.unit || getWellUnit(well) || 'M';
+    let desUnit = wellUnit;
+    if(from == 'inventory') {
+        desUnit = 'M';
+    }
 
     strtHeader = space.spaceAfter(WHLEN1, 'STRT.' + wellUnit);
-    let topValue = from == 'inventory' ? dataset.top : convertUnit(Number.parseFloat(dataset.top), 'M', wellUnit);
+    let topValue = from == 'inventory' ? dataset.top : convertUnit(Number.parseFloat(dataset.top), 'M', desUnit);
     strtHeader += space.spaceAfter(WHLEN2, topValue) + ": Top Depth";
 
     stopHeader = space.spaceAfter(WHLEN1, 'STOP.' + wellUnit);
-    let bottomValue = from == 'inventory' ? dataset.bottom : convertUnit(Number.parseFloat(dataset.bottom), 'M', wellUnit);
+    let bottomValue = from == 'inventory' ? dataset.bottom : convertUnit(Number.parseFloat(dataset.bottom), 'M', desUnit);
     stopHeader += space.spaceAfter(WHLEN2, bottomValue) + ": Bottom Depth";
 
     stepHeader = space.spaceAfter(WHLEN1, 'STEP.' + wellUnit);
-    let stepValue = from == 'inventory' ? dataset.step : convertUnit(Number.parseFloat(dataset.step), 'M', wellUnit);
+    let stepValue = from == 'inventory' ? dataset.step : convertUnit(Number.parseFloat(dataset.step), 'M', desUnit);
     stepHeader += space.spaceAfter(WHLEN2, stepValue) + ": Step";
 
-    // for (let i in wellHeaders) {
-    //     if (wellHeaders[i].header === 'STRT' && !strtHeader) {
-    //         strtHeader = space.spaceAfter(WHLEN1, 'STRT.' + wellUnit);
-    //         let topValue = dataset.top || wellHeaders[i].value;
-    //         if (from == 'project')
-    //             topValue = convertUnit(Number.parseFloat(topValue), 'M', wellUnit);
-    //         strtHeader += space.spaceAfter(WHLEN2, topValue) + ": " + wellHeaders[i].description;
-    //     }
-    //     if (wellHeaders[i].header === 'TOP' && !strtHeader) {
-    //         strtHeader = space.spaceAfter(WHLEN1, 'TOP.' + wellUnit);
-    //         let topValue = dataset.top || wellHeaders[i].value;
-    //         if (from == 'project')``
-    //             topValue = convertUnit(topValue, 'M', wellUnit);
-    //         strtHeader += space.spaceAfter(WHLEN2, topValue) + ": " + wellHeaders[i].description;
-    //     }
-    //     if (wellHeaders[i].header === 'STOP') {
-    //         stopHeader = space.spaceAfter(WHLEN1, 'STOP.' + wellUnit);
-    //         let stopValue = dataset.bottom || wellHeaders[i].value;
-    //         if (from == 'project')
-    //             stopValue = convertUnit(stopValue, 'M', wellUnit);
-    //         stopHeader += space.spaceAfter(WHLEN2, stopValue) + ": " + wellHeaders[i].description;
-    //     }
-    //     if (wellHeaders[i].header === 'STEP') {
-    //         stepHeader = space.spaceAfter(WHLEN1, 'STEP.' + wellUnit);
-    //         let stepValue = dataset.step || wellHeaders[i].value;
-    //         if (from == 'project')
-    //             stepValue = convertUnit(stepValue, 'M', wellUnit);
-    //         stepHeader += space.spaceAfter(WHLEN2, stepValue) + ": " + wellHeaders[i].description;
-    //     }
-    // }
     fs.appendFileSync(lasFilePath, strtHeader + '\r\n' + stopHeader + '\r\n' + stepHeader + '\r\n');
     //append other headers
 
@@ -138,18 +107,21 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
     fs.appendFileSync(lasFilePath, '#--------        --------------      -----    -------------------\r\n');
     fs.appendFileSync(lasFilePath, 'DEPTH.M  :\r\n');
 
+    let desUnit = dataset.unit;
+
     if (!well) {  //export from project
         well = project.wells[0];
         well.username = project.createdBy;
+        desUnit = 'M'
     }
 
-    let top = convertUnit(Number.parseFloat(dataset.top), 'M', dataset.unit);
-    let bottom = convertUnit(Number.parseFloat(dataset.bottom), 'M', dataset.unit);
-    let step = convertUnit(Number.parseFloat(dataset.step), 'M', dataset.unit);
+    let top = convertUnit(Number.parseFloat(dataset.top), 'M', desUnit);
+    let bottom = convertUnit(Number.parseFloat(dataset.bottom), 'M', desUnit);
+    let step = convertUnit(Number.parseFloat(dataset.step), 'M', desUnit);
     let readStreams = [];
     let writeStream = fs.createWriteStream(lasFilePath, { flags: 'a' });
     let curveColumns = '~A        DEPTH';
-
+ 
     for (idCurve of idCurves) {
         let curve = dataset.curves.find(function (curve) { return curve.idCurve == idCurve });
         if (curve && curve.name != MDCurve) {
@@ -168,7 +140,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                 let curvePath = await hashDir.createPath(curveBasePath, project.createdBy + project.name + well.name + dataset.name + curve.name, curve.name + '.txt');
                 console.log('curvePath', curvePath);
                 stream = fs.createReadStream(curvePath);
-                fs.appendFileSync(lasFilePath, space.spaceAfter(7, curve.name) + space.spaceAfter(22, '.' + curve.unit) + ': ' + curve.description + '  :\r\n');
+                fs.appendFileSync(lasFilePath, space.spaceAfter(7, curve.name) + space.spaceAfter(22, '.' + curve.unit) + ': ' + curve.description + '\r\n');
             }
             stream = byline.createStream(stream).pause();
             readStreams.push(stream);
@@ -195,7 +167,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
     // fs.appendFileSync(lasFilePath, curveColumns + '\r\n');
 
     //write curves
-    if (readStreams.length === 0) {
+    if (readStreams.length === 0 || idCurves.length == 0) {
         for (let i = top; i < bottom + step; i += step) {
             writeStream.write(space.spaceBefore(15, i.toFixed(2)) + '\r\n', function () {
                 if (i >= bottom) {
