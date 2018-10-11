@@ -45,9 +45,9 @@ function writeWellHeader(lasFilePath, well) {
     let strtHeader = space.spaceAfter(20, 'STRT  .' + wellUnit);
     let stopHeader = space.spaceAfter(20, 'STOP  .' + wellUnit);
     let stepHeader = space.spaceAfter(20, 'STEP  .' + wellUnit);
-    strtHeader += space.spaceAfter(36, getWellTopDepth(well)) + ": Top Depth";
-    stopHeader += space.spaceAfter(36, getWellBottomDepth(well)) + ": Bottom Depth";
-    stepHeader += space.spaceAfter(36, getWellStep(well)) + ": Step";
+    strtHeader += space.spaceAfter(36, getWellTopDepth(well).toFixed(4)) + ": Top Depth";
+    stopHeader += space.spaceAfter(36, getWellBottomDepth(well).toFixed(4)) + ": Bottom Depth";
+    stepHeader += space.spaceAfter(36, getWellStep(well).toFixed(4)) + ": Step";
  
     fs.appendFileSync(lasFilePath, strtHeader + '\r\n' + stopHeader + '\r\n' + stepHeader + '\r\n');
     //append other headers
@@ -145,7 +145,7 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
                 let tokens = line.toString('utf8').split("||");
                 let index = tokens.toString().substring(0, tokens.toString().indexOf(" "));
                 tokens = tokens.toString().substring(tokens.toString().indexOf(" ") + 1);
-                if (tokens == null || tokens == NaN || tokens == 'null' || tokens == 'NaN' || !tokens) {
+                if (tokens == null || tokens == NaN || tokens == 'null' || tokens == 'NaN' || !tokens || token == '') {
                     // let nullHeader = well.well_headers.find(header => {
                     //     return header.header == "NULL";
                     // })

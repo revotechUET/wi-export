@@ -56,15 +56,15 @@ function writeWellHeader(lasFilePath, well, dataset, from) {
 
     strtHeader = space.spaceAfter(WHLEN1, 'STRT.' + wellUnit);
     let topValue = from == 'inventory' ? dataset.top : convertUnit(Number.parseFloat(dataset.top), 'M', wellUnit);
-    strtHeader += space.spaceAfter(WHLEN2, topValue) + ": Top Depth";
+    strtHeader += space.spaceAfter(WHLEN2, topValue.toFixed(4)) + ": Top Depth";
 
     stopHeader = space.spaceAfter(WHLEN1, 'STOP.' + wellUnit);
     let bottomValue = from == 'inventory' ? dataset.bottom : convertUnit(Number.parseFloat(dataset.bottom), 'M', wellUnit);
-    stopHeader += space.spaceAfter(WHLEN2, bottomValue) + ": Bottom Depth";
+    stopHeader += space.spaceAfter(WHLEN2, bottomValue.toFixed(4)) + ": Bottom Depth";
 
     stepHeader = space.spaceAfter(WHLEN1, 'STEP.' + wellUnit);
     let stepValue = from == 'inventory' ? dataset.step : convertUnit(Number.parseFloat(dataset.step), 'M', wellUnit);
-    stepHeader += space.spaceAfter(WHLEN2, stepValue) + ": Step";
+    stepHeader += space.spaceAfter(WHLEN2, stepValue.toFixed(4)) + ": Step";
 
     fs.appendFileSync(lasFilePath, strtHeader + '\r\n' + stopHeader + '\r\n' + stepHeader + '\r\n');
     //append other headers
@@ -185,7 +185,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                 readLine++;
                 let tokens = line.toString('utf8').split("||");
                 tokens = tokens.toString().substring(tokens.toString().indexOf(" ") + 1);
-                if (tokens == null || tokens == NaN || tokens == 'null' || tokens == 'NaN' || !tokens) {
+                if (tokens == null || tokens == NaN || tokens == 'null' || tokens == 'NaN' || !tokens || token == '') {
                     // let nullHeader = well.well_headers.find(header => {
                     //     return header.header == "NULL";
                     // })
