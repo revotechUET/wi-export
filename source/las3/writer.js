@@ -55,10 +55,10 @@ function writeWellHeader(lasFilePath, well) {
  
     fs.appendFileSync(lasFilePath, strtHeader + '\r\n' + stopHeader + '\r\n' + stepHeader + '\r\n' + totalHeader + '\r\n');
     //append other headers
-    let nullHeader = space.spaceAfter(20, " " + 'NULL' + '.') + space.spaceAfter(36, '-9999') + ": NULL VALUE\r\n";
+    let nullHeader = space.spaceAfter(20, 'NULL' + '.') + space.spaceAfter(36, '-9999') + ": NULL VALUE\r\n";
     fs.appendFileSync(lasFilePath, nullHeader);
 
-    let wellHeader = space.spaceAfter(20, " " + 'WELL' + '.') + space.spaceAfter(36, well.name) + ": " + 'WELL NAME' + '\r\n';
+    let wellHeader = space.spaceAfter(20, 'WELL' + '.') + space.spaceAfter(36, well.name) + ": " + 'WELL NAME' + '\r\n';
     fs.appendFileSync(lasFilePath, wellHeader);
    
     for (i in wellHeaders) {
@@ -73,10 +73,13 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
     fs.appendFileSync(lasFilePath, '\r\n~' + dataset.name.toUpperCase().replace(/ /g, ".").replace(/_DATA/,"") + '_PARAMETER\r\n');
     fs.appendFileSync(lasFilePath, '#MNEM.UNIT                    VALUE                        DESCRIPTION\r\n');
     fs.appendFileSync(lasFilePath, '#--------------- ---         ------------                 -----------------\r\n\r\n');
+    fs.appendFileSync(space.spaceAfter(16, 'SET') + space.spaceAfter(14, '.') + space.spaceAfter(28, dataset.name) + ':\r\n');
     if (dataset.dataset_params && dataset.dataset_params.length > 0) {
         for (param of dataset.dataset_params) {
-            let line = space.spaceAfter(16, param.mnem) + space.spaceAfter(14, '.' + param.unit) + space.spaceAfter(28, param.value) + ': ' + param.description + '\r\n';
-            fs.appendFileSync(lasFilePath, line);
+            if(param.value) {
+                let line = space.spaceAfter(16, param.mnem) + space.spaceAfter(14, '.' + param.unit) + space.spaceAfter(28, param.value) + ': ' + param.description + '\r\n';
+                fs.appendFileSync(lasFilePath, line);
+            }
         }
     }
     fs.appendFileSync(lasFilePath, '\r\n\r\n~' + dataset.name.toUpperCase().replace(/ /g, ".").replace(/_DATA/,"") + '_DEFINITION\r\n');

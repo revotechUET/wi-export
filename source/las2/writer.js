@@ -54,19 +54,19 @@ function writeWellHeader(lasFilePath, well, dataset, from) {
     let stepHeader;
     let wellUnit = dataset.unit || getWellUnit(well) || 'M';
 
-    strtHeader = space.spaceAfter(WHLEN1, 'STRT.' + wellUnit);
+    strtHeader = space.spaceAfter(WHLEN1, " " + 'STRT.' + wellUnit);
     let topValue = from == 'inventory' ? dataset.top : convertUnit(Number.parseFloat(dataset.top), 'M', wellUnit);
     strtHeader += space.spaceAfter(WHLEN2, Number.parseFloat(topValue).toFixed(4)) + ": Top Depth";
 
-    stopHeader = space.spaceAfter(WHLEN1, 'STOP.' + wellUnit);
+    stopHeader = space.spaceAfter(WHLEN1, " " + 'STOP.' + wellUnit);
     let bottomValue = from == 'inventory' ? dataset.bottom : convertUnit(Number.parseFloat(dataset.bottom), 'M', wellUnit);
     stopHeader += space.spaceAfter(WHLEN2, Number.parseFloat(bottomValue).toFixed(4)) + ": Bottom Depth";
 
-    stepHeader = space.spaceAfter(WHLEN1, 'STEP.' + wellUnit);
+    stepHeader = space.spaceAfter(WHLEN1, " " + 'STEP.' + wellUnit);
     let stepValue = from == 'inventory' ? dataset.step : convertUnit(Number.parseFloat(dataset.step), 'M', wellUnit);
     stepHeader += space.spaceAfter(WHLEN2, Number.parseFloat(stepValue).toFixed(4)) + ": Step";
 
-    totalHeader = space.spaceAfter(WHLEN1, 'TOTAL DEPTH.' + wellUnit);
+    totalHeader = space.spaceAfter(WHLEN1, " " + 'TOTAL DEPTH.' + wellUnit);
     let totalValue = Number.parseFloat(bottomValue) - Number.parseFloat(topValue);
     console.log('------', topValue, bottomValue, totalValue);
     totalHeader += space.spaceAfter(WHLEN2, Number.parseFloat(totalValue).toFixed(4)) + ": Total Depth";
@@ -154,15 +154,16 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
 
     fs.appendFileSync(lasFilePath, '~Parameter\r\n');
     fs.appendFileSync(lasFilePath, '#MNEM.UNIT       Value                        Description\r\n');
-    fs.appendFileSync(lasFilePath, '#---------       ---------                    -------------\r\n');
-    fs.appendFileSync(lasFilePath, curveColumns + '\r\n');
+    fs.appendFileSync(lasFilePath, '#---------                    -------------\r\n');
 
-
+    fs.appendFileSync(lasFilePath, space.spaceAfter(17, "SET.") + space.spaceAfter(29, dataset.name) + ': \r\n');
     if (dataset.dataset_params) {
         for (param of dataset.dataset_params) {
-            fs.appendFileSync(lasFilePath, space.spaceAfter(17, param.mnem) + space.spaceAfter(29, param.value) + ": " + param.description + '\r\n');
+            if(param.value)
+                fs.appendFileSync(lasFilePath, space.spaceAfter(17, param.mnem + '.' + param.unit) + space.spaceAfter(29, param.value) + ": " + param.description + '\r\n');
         }
     }
+    fs.appendFileSync(lasFilePath, curveColumns + '\r\n');
     // fs.appendFileSync(lasFilePath, curveColumns + '\r\n');
 
     //write curves
