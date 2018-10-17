@@ -11,19 +11,19 @@ const WHLEN2 = 24;
 let _unitTable = null;
 
 module.exports.setUnitTable = setUnitTable;
-function setUnitTable (unitTable) {
+function setUnitTable(unitTable) {
     _unitTable = unitTable;
 }
 
 
 function convertUnit(value, fromUnit, desUnit) {
     //todo
-    if(!_unitTable) return value;
+    if (!_unitTable) return value;
     let unitTable = _unitTable;
     let fromRate = unitTable[fromUnit];
     let desRate = unitTable[desUnit];
     if (fromRate && desRate) {
-        
+
         return value * desRate / fromRate;
     }
     return value;
@@ -37,7 +37,7 @@ function writeVersion(lasFilePath) {
 
 function getWellUnit(well) {
     // TODO
-    let unitHeader = well.well_headers.find(function(header) {
+    let unitHeader = well.well_headers.find(function (header) {
         return header.header == 'UNIT';
     })
     return unitHeader.value;
@@ -88,7 +88,7 @@ function writeWellHeader(lasFilePath, well, dataset, from) {
     //     fs.appendFileSync(lasFilePath, header);
     // }
     for (i in wellHeaders) {
-        if (wellHeaders[i].value && wellHeaders[i].header !== 'filename' && wellHeaders[i].header !== 'STRT' && wellHeaders[i].header !== 'STOP' && wellHeaders[i].header !== 'STEP' && wellHeaders[i].header !== 'NULL' && wellHeaders[i].header !== 'WELL'&& wellHeaders[i].header != 'TOTAL DEPTH') {
+        if (wellHeaders[i].value && wellHeaders[i].header !== 'filename' && wellHeaders[i].header !== 'STRT' && wellHeaders[i].header !== 'STOP' && wellHeaders[i].header !== 'STEP' && wellHeaders[i].header !== 'NULL' && wellHeaders[i].header !== 'WELL' && wellHeaders[i].header != 'TOTAL DEPTH') {
             let header = space.spaceAfter(WHLEN1, " " + wellHeaders[i].header.toString() + '.' + wellHeaders[i].unit) + space.spaceAfter(WHLEN2, wellHeaders[i].value) + ": " + wellHeaders[i].description + '\r\n';
             fs.appendFileSync(lasFilePath, header);
         }
@@ -106,7 +106,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
     fs.appendFileSync(lasFilePath, '~Curve\r\n');
     fs.appendFileSync(lasFilePath, '#MNEM.UNIT       API Code            Curve    Description\r\n');
     fs.appendFileSync(lasFilePath, '#--------        --------------      -----    -------------------\r\n');
-    fs.appendFileSync(lasFilePath, 'DEPTH.M  :\r\n');
+    fs.appendFileSync(lasFilePath, space.spaceAfter(7, 'DEPTH') + space.spaceAfter(22, '.' + dataset.unit) + ':\r\n');
 
 
     if (!well) {  //export from project
@@ -120,7 +120,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
     let readStreams = [];
     let writeStream = fs.createWriteStream(lasFilePath, { flags: 'a' });
     let curveColumns = '~A        DEPTH';
- 
+
     for (idCurve of idCurves) {
         let curve = dataset.curves.find(function (curve) { return curve.idCurve == idCurve });
         if (curve && curve.name != MDCurve) {
@@ -159,8 +159,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
     fs.appendFileSync(lasFilePath, space.spaceAfter(17, "SET.") + space.spaceAfter(29, dataset.name) + ': \r\n');
     if (dataset.dataset_params) {
         for (param of dataset.dataset_params) {
-            if(param.value)
-                fs.appendFileSync(lasFilePath, space.spaceAfter(17, param.mnem + '.' + param.unit) + space.spaceAfter(29, param.value) + ": " + param.description + '\r\n');
+            fs.appendFileSync(lasFilePath, space.spaceAfter(17, param.mnem + '.' + param.unit) + space.spaceAfter(29, param.value) + ": " + param.description + '\r\n');
         }
     }
     fs.appendFileSync(lasFilePath, curveColumns + '\r\n');
@@ -191,7 +190,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                 readLine++;
                 let tokens = line.toString('utf8').split("||");
                 tokens = tokens.toString().substring(tokens.toString().indexOf(" ") + 1);
-                if (tokens == null || tokens == NaN || tokens.substring(0,4) == 'null' || tokens == 'NaN' || !tokens) {
+                if (tokens == null || tokens == NaN || tokens.substring(0, 4) == 'null' || tokens == 'NaN' || !tokens) {
                     // let nullHeader = well.well_headers.find(header => {
                     //     return header.header == "NULL";
                     // })
