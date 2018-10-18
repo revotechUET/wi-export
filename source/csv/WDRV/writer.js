@@ -92,13 +92,16 @@ async function writeDataset(csvStream, writeStream, project, well, dataset, idCu
 
     if (readStreams.length === 0 || idCurves.length == 0) {
         console.log('hiuhiu');
-        for (let i = top; i < bottom + step; i += step) {
-            let lineArr = generateLineArr(well.name, dataset.name, i.toFixed(4), numOfPreCurve);
-            csvStream.write(lineArr);
-            if (i >= bottom) {
-                callback();
+        if(step == 0) {
+            callback();
+        } else
+            for (let i = top; i < bottom + step; i += step) {
+                let lineArr = generateLineArr(well.name, dataset.name, i.toFixed(4), numOfPreCurve);
+                csvStream.write(lineArr);
+                if (i >= bottom) {
+                    callback();
+                }
             }
-        }
     } else {
         readStreams[0].resume();
         let lineArr;
@@ -109,6 +112,7 @@ async function writeDataset(csvStream, writeStream, project, well, dataset, idCu
                 readLine++;
                 let tokens = line.toString('utf8').split("||");
                 tokens = tokens.toString().substring(tokens.toString().indexOf(" ") + 1);
+                let index = tokens.toString().substring(0, tokens.toString().indexOf(" "));
                 if (tokens == null || tokens == NaN || tokens.substring(0,4) == 'null' || tokens == 'NaN' || !tokens) {
                     // let nullHeader = well.well_headers.find(header => {
                     //     return header.header == "NULL";
@@ -117,7 +121,9 @@ async function writeDataset(csvStream, writeStream, project, well, dataset, idCu
                     tokens = '-9999';
                 }
                 if (i === 0) {
-                    let depth = top.toFixed(4).toString();
+                    let depth;
+                    if (step == 0) depth = index = Number(index).toFixed(4);
+                    else depth = top.toFixed(4);
                     lineArr = generateLineArr(well.name, dataset.name, depth, numOfPreCurve);
                     top += step;
                 }
