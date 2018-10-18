@@ -9,10 +9,6 @@ const MDCurve = '__MD';
 let _unitTable = null;
 
 module.exports.setUnitTable = setUnitTable;
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
 function setUnitTable(unitTable) {
     _unitTable = unitTable;
 }
