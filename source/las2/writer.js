@@ -210,7 +210,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                 tokens = space.spaceBefore(18, tokens);
                 if (i === 0) {
                     index = Number(index);
-                    let depth;
+                    let depth, hasDepth;
                     if (step == 0 || hasDepth) {
                         depth = index.toFixed(4);
                         hasDepth = true;
