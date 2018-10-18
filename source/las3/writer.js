@@ -128,16 +128,22 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
     //writeCurves
     if (readStreams.length === 0 || idCurves.length == 0) {
         console.log('hiuhiu', top, bottom, step);
-        for (let i = top; i < bottom + step; i += step) {
-            writeStream.write(space.spaceBefore(15, i.toFixed(2)) + '\r\n', function () {
-                if (i >= bottom) {
-                    callback(null, {
-                        fileName: fileName,
-                        wellName: well.name
-                    })
-                }
-            });
-        }
+        if(step == 0) {
+            callback(null, {
+                fileName: fileName,
+                wellName: well.name
+            })
+        } else 
+            for (let i = top; i < bottom + step; i += step) {
+                writeStream.write(space.spaceBefore(15, i.toFixed(2)) + '\r\n', function () {
+                    if (i >= bottom) {
+                        callback(null, {
+                            fileName: fileName,
+                            wellName: well.name
+                        })
+                    }
+                });
+            }
     } else {
         readStreams[0].resume();
         let hasDepth;
@@ -165,7 +171,7 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
                 if (i === 0) {
                     index = Number(index);
                     let depth;
-                    if (index.toFixed(2) == top.toFixed(2) || hasDepth) {
+                    if (step == 0 || hasDepth) {
                         depth = index.toFixed(5).toString() + ',';
                         hasDepth = true;
                     } else {

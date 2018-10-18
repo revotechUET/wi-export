@@ -93,16 +93,23 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
         console.log('hiuhiu');
         csvStream.write(curveNameArr);
         csvStream.write(curveUnitArr);
-        for (let i = top; i < bottom + step; i += step) {
-            csvStream.write([i.toFixed(4)]);
-            if (i >= bottom) {
-                callback(null, {
-                    fileName: fileName,
-                    wellName: well.name,
-                    datasetName: dataset.name
-                })
+        if(step == 0) {
+            callback(null, {
+                fileName: fileName,
+                wellName: well.name,
+                datasetName: dataset.name
+            })
+        } else
+            for (let i = top; i < bottom + step; i += step) {
+                csvStream.write([i.toFixed(4)]);
+                if (i >= bottom) {
+                    callback(null, {
+                        fileName: fileName,
+                        wellName: well.name,
+                        datasetName: dataset.name
+                    })
+                }
             }
-        }
     } else {
         readStreams[0].resume();
         csvStream.write(curveNameArr);
@@ -114,6 +121,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
             readStreams[i].on('data', function (line) {
                 readLine++;
                 let tokens = line.toString('utf8').split("||");
+                let index = tokens.toString().substring(0, tokens.toString().indexOf(" "));
                 tokens = tokens.toString().substring(tokens.toString().indexOf(" ") + 1);
                 if (tokens == null || tokens == NaN || tokens.substring(0,4) == 'null' || tokens == 'NaN' || !tokens ) {
                     // let nullHeader = well.well_headers.find(header => {
@@ -123,7 +131,9 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                     tokens = '-9999';
                 }
                 if (i === 0) {
-                    let depth = top.toFixed(4).toString();
+                    let depth;
+                    if (step == 0) depth = Number(index).toFixed(4);
+                    else depth = top.toFixed(4);
                     tokenArr.push(depth);
                     top += step;
                 }

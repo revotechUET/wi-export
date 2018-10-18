@@ -167,17 +167,24 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
 
     //write curves
     if (readStreams.length === 0 || idCurves.length == 0) {
-        for (let i = top; i < bottom + step; i += step) {
-            writeStream.write(space.spaceBefore(15, i.toFixed(2)) + '\r\n', function () {
-                if (i >= bottom) {
-                    callback(null, {
-                        fileName: fileName,
-                        wellName: well.name,
-                        datasetName: dataset.name
-                    })
-                }
-            });
-        }
+        if (step == 0) {
+            callback(null, {
+                fileName: fileName,
+                wellName: well.name,
+                datasetName: dataset.name
+            })
+        } else
+            for (let i = top; i < bottom + step; i += step) {
+                writeStream.write(space.spaceBefore(15, i.toFixed(2)) + '\r\n', function () {
+                    if (i >= bottom) {
+                        callback(null, {
+                            fileName: fileName,
+                            wellName: well.name,
+                            datasetName: dataset.name
+                        })
+                    }
+                });
+            }
     } else {
         readStreams[0].resume();
         for (let i = 0; i < readStreams.length; i++) {
@@ -189,6 +196,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
             readStreams[i].on('data', function (line) {
                 readLine++;
                 let tokens = line.toString('utf8').split("||");
+                let index = tokens.toString().substring(0, tokens.toString().indexOf(" "));
                 tokens = tokens.toString().substring(tokens.toString().indexOf(" ") + 1);
                 if (tokens == null || tokens == NaN || tokens.substring(0, 4) == 'null' || tokens == 'NaN' || !tokens) {
                     // let nullHeader = well.well_headers.find(header => {
@@ -201,7 +209,16 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                     tokens = parseFloat(tokens).toFixed(4);
                 tokens = space.spaceBefore(18, tokens);
                 if (i === 0) {
-                    let depth = top.toFixed(4).toString();
+                    index = Number(index);
+                    let depth;
+                    if (step == 0 || hasDepth) {
+                        depth = index.toFixed(4);
+                        hasDepth = true;
+                    } else {
+                        depth = top.toFixed(4);
+                        top += step;
+                    }
+
                     depth = space.spaceBefore(15, depth);
                     tokens = depth + tokens;
                     top += step;
