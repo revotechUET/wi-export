@@ -36,7 +36,7 @@ function writeHeader(csvStream, well, idCurves) {
     csvStream.write([]);
 
     let columnArr = ['WELL', 'Dataset', 'Depth'];
-    let unitArr = ['.', '.', 'M'];
+    let unitArr = ['.', '.', dataset.unit || 'M'];
     async.eachOfSeries(well.datasets, function (dataset, index, nextDataset) {
         async.eachOfSeries(dataset.curves, function (curve, idx, nextCurve) {
             if(idCurves.find(function (id) {return id == curve.idCurve}) && curve.idCurve != MDCurve) {

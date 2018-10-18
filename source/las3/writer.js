@@ -7,6 +7,9 @@ let wiImport = require('wi-import');
 let hashDir = wiImport.hashDir;
 const MDCurve = '__MD';
 let _unitTable = null;
+let _wellTopDepth;
+let _wellBottomDepth;
+let _wellStep;
 
 module.exports.setUnitTable = setUnitTable;
 function setUnitTable(unitTable) {
@@ -46,12 +49,12 @@ function writeWellHeader(lasFilePath, well) {
     let stopHeader = space.spaceAfter(20, 'STOP  .' + wellUnit);
     let stepHeader = space.spaceAfter(20, 'STEP  .' + wellUnit);
     let totalHeader = space.spaceAfter(20, 'TOTAL DEPTH  .' + wellUnit);
-    strtHeader += space.spaceAfter(36, Number.parseFloat(getWellTopDepth(well)).toFixed(4)) + ": Top Depth";
-    stopHeader += space.spaceAfter(36, Number.parseFloat(getWellBottomDepth(well)).toFixed(4)) + ": Bottom Depth";
-    stepHeader += space.spaceAfter(36, Number.parseFloat(getWellStep(well)).toFixed(4)) + ": Step";
+    strtHeader += space.spaceAfter(36, Number.parseFloat(_wellTopDepth.toFixed(4))) + ": Top Depth";
+    stopHeader += space.spaceAfter(36, Number.parseFloat(_wellBottomDepth).toFixed(4)) + ": Bottom Depth";
+    stepHeader += space.spaceAfter(36, Number.parseFloat(_wellStep).toFixed(4)) + ": Step";
     totalHeader += space.spaceAfter(36,
-        (Number.parseFloat(getWellBottomDepth(well)) -
-            Number.parseFloat(getWellTopDepth(well))).toFixed(4)) + ": Total Depth";
+        (Number.parseFloat(_wellBottomDepth) -
+            Number.parseFloat(_wellTopDepth)).toFixed(4)) + ": Total Depth";
 
     fs.appendFileSync(lasFilePath, strtHeader + '\r\n' + stopHeader + '\r\n' + stepHeader + '\r\n' + totalHeader + '\r\n');
     //append other headers
@@ -172,10 +175,10 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
                     index = Number(index);
                     let depth;
                     if (step == 0 || hasDepth) {
-                        depth = index.toFixed(5).toString() + ',';
+                        depth = index.toFixed(4).toString() + ',';
                         hasDepth = true;
                     } else {
-                        depth = top.toFixed(5).toString() + ',';
+                        depth = top.toFixed(4).toString() + ',';
                         top += step;
                     }
                     depth = space.spaceBefore(16, depth);
@@ -249,6 +252,11 @@ function writeAll(exportPath, project, well, datasetObjs, username, s3, curveMod
         fs.mkdirSync(lasFilePath);
     }
 
+    if(datasetObjs.length > 1) {
+        _wellBottomDepth = convertUnit(getWellBottomDepth(well), 'M', well.unit);
+        _wellTopDepth = convertUnit(getWellTopDepth(well), 'M', well.unit);
+        _wellStep = convertUnit(getWellStep(well), 'M', well.unit);
+    }
 
     let fileName = well.name + "_" + Date.now() + '.las'
     fileName = fileName.replace(/\//g, "-");
@@ -275,17 +283,17 @@ function writeAll(exportPath, project, well, datasetObjs, username, s3, curveMod
 
 function getWellTopDepth(well) {
     let datasets = well.datasets;
-    return Math.min(...datasets.map(d => +d.top));
+    return Math.min(...datasets.map(d => +convertUnit(d.top, d.unit, 'M')));
 }
 
 function getWellBottomDepth(well) {
     let datasets = well.datasets;
-    return Math.max(...datasets.map(d => +d.bottom));
+    return Math.max(...datasets.map(d => +convertUnit(d.bottom, d.unit, 'M')));
 }
 
 function getWellStep(well) {
     let datasets = well.datasets;
-    return datasets[0] ? datasets[0].step : 0;
+    return datasets[0] ? convertUnit(datasets[0].step, dataset[0].unit, 'M') : 0;
 }
 
 module.exports.writeAll = writeAll;

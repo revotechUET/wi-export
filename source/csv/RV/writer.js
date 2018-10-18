@@ -62,7 +62,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
     let curveNameArr = [];
     let curveUnitArr = [];
     curveNameArr.push('Depth');
-    curveUnitArr.push('M');
+    curveUnitArr.push(desUnit);
 
     for (idCurve of idCurves) {
         let curve = dataset.curves.find(function (curve) { return curve.idCurve == idCurve });
