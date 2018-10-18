@@ -9,6 +9,10 @@ const MDCurve = '__MD';
 let _unitTable = null;
 
 module.exports.setUnitTable = setUnitTable;
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 function setUnitTable(unitTable) {
     _unitTable = unitTable;
 }
@@ -93,10 +97,12 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
     let bottom = convertUnit(Number.parseFloat(dataset.bottom), 'M', desUnit);
     let step = convertUnit(Number.parseFloat(dataset.step), 'M', desUnit);
     let readStreams = [];
-    let writeStream = fs.createWriteStream(lasFilePath, { flags: 'a' })
+    let writeStream = fs.createWriteStream(lasFilePath, {flags: 'a'})
 
     for (idCurve of idCurves) {
-        let curve = dataset.curves.find(function (curve) { return curve.idCurve == idCurve });
+        let curve = dataset.curves.find(function (curve) {
+            return curve.idCurve == idCurve
+        });
         let line;
         if (curve && curve.name != MDCurve) {
             let stream;
@@ -156,15 +162,15 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
                 let tokens = line.toString('utf8').split("||");
                 let index = tokens.toString().substring(0, tokens.toString().indexOf(" "));
                 tokens = tokens.toString().substring(tokens.toString().indexOf(" ") + 1);
-                if (tokens == null || tokens == NaN || tokens.substring(0, 4) == 'null' || tokens == 'NaN' || !tokens) {
+                // if (tokens == null || tokens == NaN || tokens.substring(0, 4) == 'null' || tokens == 'NaN' || !tokens) {
+                let _ = require('lodash');
+                if (!_.isFinite(parseFloat(tokens))) {
                     // let nullHeader = well.well_headers.find(header => {
                     //     return header.header == "NULL";
                     // })
                     // tokens = nullHeader ? nullHeader.value :  '-999.0000';
                     tokens = '-9999';
-                }
-                if (tokens != '-9999')
-                    tokens = parseFloat(tokens).toFixed(4);
+                } else tokens = parseFloat(tokens).toFixed(4);
                 tokens = space.spaceBefore(15, tokens);
                 if (i === 0) {
                     index = Number(index);
@@ -256,7 +262,9 @@ function writeAll(exportPath, project, well, datasetObjs, username, s3, curveMod
     async.mapSeries(datasetObjs, function (item, cb) {
         console.log('callback', cb);
         console.log('111111', item.idCurves);
-        let dataset = well.datasets.find(function (dataset) { return dataset.idDataset == item.idDataset; });
+        let dataset = well.datasets.find(function (dataset) {
+            return dataset.idDataset == item.idDataset;
+        });
         writeDataset(lasFilePath, fileName, project, well, dataset, item.idCurves, s3, curveModel, curveBasePath, cb);
     }, function cb(err, rs) {
         console.log('map series callback');
