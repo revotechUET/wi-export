@@ -219,7 +219,6 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                         top += step;
                     }
 
-                    let depth = top.toFixed(4).toString();
                     depth = space.spaceBefore(15, depth);
                     tokens = depth + tokens;
                     top += step;
