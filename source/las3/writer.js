@@ -10,6 +10,7 @@ let _unitTable = null;
 let _wellTopDepth;
 let _wellBottomDepth;
 let _wellStep;
+let _wellUnit;
 
 module.exports.setUnitTable = setUnitTable;
 function setUnitTable(unitTable) {
@@ -44,12 +45,12 @@ function writeWellHeader(lasFilePath, well) {
     fs.appendFileSync(lasFilePath, '#MNEM.UNIT          DATA                                DESCRIPTION\r\n');
     fs.appendFileSync(lasFilePath, '#----- ----        -----------------                   -----------\r\n');
     //append start depth, stop depth and step
-    let wellUnit = well.unit || 'M';
+    let wellUnit = _wellUnit || well.unit || 'M';
     let strtHeader = space.spaceAfter(20, 'STRT  .' + wellUnit);
     let stopHeader = space.spaceAfter(20, 'STOP  .' + wellUnit);
     let stepHeader = space.spaceAfter(20, 'STEP  .' + wellUnit);
     let totalHeader = space.spaceAfter(20, 'TOTAL DEPTH  .' + wellUnit);
-    strtHeader += space.spaceAfter(36, Number.parseFloat(_wellTopDepth.toFixed(4))) + ": Top Depth";
+    strtHeader += space.spaceAfter(36, Number.parseFloat(_wellTopDepth).toFixed(4)) + ": Top Depth";
     stopHeader += space.spaceAfter(36, Number.parseFloat(_wellBottomDepth).toFixed(4)) + ": Bottom Depth";
     stepHeader += space.spaceAfter(36, Number.parseFloat(_wellStep).toFixed(4)) + ": Step";
     totalHeader += space.spaceAfter(36,
@@ -256,6 +257,15 @@ function writeAll(exportPath, project, well, datasetObjs, username, s3, curveMod
         _wellBottomDepth = convertUnit(getWellBottomDepth(well), 'M', well.unit);
         _wellTopDepth = convertUnit(getWellTopDepth(well), 'M', well.unit);
         _wellStep = convertUnit(getWellStep(well), 'M', well.unit);
+        _wellUnit = well.unit;
+    } else {
+        let dataset = well.datasets.find(function (dataset) {
+            return dataset.idDataset == datasetObjs[0].idDataset;
+        });
+        _wellBottomDepth = dataset.bottom;
+        _wellTopDepth = dataset.top;
+        _wellStep = dataset.step;
+        _wellUnit = dataset.unit;
     }
 
     let fileName = well.name + "_" + Date.now() + '.las'

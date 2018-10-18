@@ -8,6 +8,7 @@ let wiImport = require('wi-import');
 const MDCurve = '__MD';
 let hashDir = wiImport.hashDir;
 let _unitTable = null;
+let _wellUnit;
 
 module.exports.setUnitTable = setUnitTable;
 function setUnitTable (unitTable) {
@@ -36,7 +37,7 @@ function writeHeader(csvStream, well, idCurves) {
     csvStream.write([]);
 
     let columnArr = ['WELL', 'Dataset', 'Depth'];
-    let unitArr = ['.', '.', dataset.unit || 'M'];
+    let unitArr = ['.', '.', _wellUnit || 'M'];
     async.eachOfSeries(well.datasets, function (dataset, index, nextDataset) {
         async.eachOfSeries(dataset.curves, function (curve, idx, nextCurve) {
             if(idCurves.find(function (id) {return id == curve.idCurve}) && curve.idCurve != MDCurve) {
@@ -59,13 +60,9 @@ function writeHeader(csvStream, well, idCurves) {
 
 async function writeDataset(csvStream, writeStream, project, well, dataset, idCurves, numOfPreCurve, s3, curveModel, curveBasePath, callback) {
 
-    let desUnit = dataset.unit || 'M';
-    if(!project) {
-        desUnit = 'M';
-    }
-    let top = convertUnit(Number.parseFloat(dataset.top), 'M', desUnit);
-    let bottom = convertUnit(Number.parseFloat(dataset.bottom), 'M', desUnit);
-    let step = convertUnit(Number.parseFloat(dataset.step), 'M', desUnit);
+    let top = convertUnit(Number.parseFloat(dataset.top), 'M', _wellUnit);
+    let bottom = convertUnit(Number.parseFloat(dataset.bottom), 'M', _wellUnit);
+    let step = convertUnit(Number.parseFloat(dataset.step), 'M', _wellUnit);
     let readStreams = [];
 
     for (idCurve of idCurves) {
@@ -122,7 +119,7 @@ async function writeDataset(csvStream, writeStream, project, well, dataset, idCu
                 }
                 if (i === 0) {
                     let depth;
-                    if (step == 0) depth = index = Number(index).toFixed(4);
+                    if (step == 0) depth = index = convertUnit(Number(index), dataset.unit, _wellUnit).toFixed(4);
                     else depth = top.toFixed(4);
                     lineArr = generateLineArr(well.name, dataset.name, depth, numOfPreCurve);
                     top += step;
@@ -186,6 +183,12 @@ function writeAll(exportPath, project, well, datasetObjs, username, s3, curveMod
         fs.mkdirSync(lasFilePath);
     }
 
+    if(datasetObjs.length > 1) {
+        _wellUnit = well.unit || 'M';
+    } else {
+        let dataset = well.datasets.find(function (dataset) { return dataset.idDataset == datasetObjs[0].idDataset; });
+        _wellUnit = dataset.unit || 'M';
+    }
 
     let fileName = well.name + "_" + Date.now() + '.csv'
     fileName = fileName.replace(/\//g, "-");
