@@ -42,14 +42,12 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
     /*export from project
         well, s3, curveModel are null
     */
-   let desUnit = dataset.unit;
+   let desUnit = dataset.unit || 'M';
     if (project) {  //export from project
         well = project.wells[0];
         well.username = project.createdBy;
     }
-    if(!project) 
-        desUnit = 'M';
-
+ 
     let top = convertUnit(Number.parseFloat(dataset.top), 'M', desUnit);
     let bottom = convertUnit(Number.parseFloat(dataset.bottom), 'M', desUnit);
     let step = convertUnit(Number.parseFloat(dataset.step), 'M', desUnit);
@@ -62,7 +60,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
     let curveNameArr = [];
     let curveUnitArr = [];
     curveNameArr.push('Depth');
-    curveUnitArr.push('M');
+    curveUnitArr.push(desUnit);
 
     for (idCurve of idCurves) {
         let curve = dataset.curves.find(function (curve) { return curve.idCurve == idCurve });
