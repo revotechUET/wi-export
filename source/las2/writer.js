@@ -11,6 +11,7 @@ const WHLEN2 = 24;
 let _unitTable = null;
 
 module.exports.setUnitTable = setUnitTable;
+
 function setUnitTable(unitTable) {
     _unitTable = unitTable;
 }
@@ -118,11 +119,13 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
     let bottom = convertUnit(Number.parseFloat(dataset.bottom), 'M', dataset.unit);
     let step = convertUnit(Number.parseFloat(dataset.step), 'M', dataset.unit);
     let readStreams = [];
-    let writeStream = fs.createWriteStream(lasFilePath, { flags: 'a' });
+    let writeStream = fs.createWriteStream(lasFilePath, {flags: 'a'});
     let curveColumns = '~A        DEPTH';
 
     for (idCurve of idCurves) {
-        let curve = dataset.curves.find(function (curve) { return curve.idCurve == idCurve });
+        let curve = dataset.curves.find(function (curve) {
+            return curve.idCurve == idCurve
+        });
         if (curve && curve.name != MDCurve) {
             let stream;
             if (!project) { //export from inventory
@@ -198,15 +201,14 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                 let tokens = line.toString('utf8').split("||");
                 let index = tokens.toString().substring(0, tokens.toString().indexOf(" "));
                 tokens = tokens.toString().substring(tokens.toString().indexOf(" ") + 1);
-                if (tokens == null || tokens == NaN || tokens.substring(0, 4) == 'null' || tokens == 'NaN' || !tokens) {
+                let _ = require('lodash');
+                if (!_.isFinite(parseFloat(tokens))) {
                     // let nullHeader = well.well_headers.find(header => {
                     //     return header.header == "NULL";
                     // })
-                    // tokens = nullHeader ? nullHeader.value : '-999.0000';
+                    // tokens = nullHeader ? nullHeader.value :  '-999.0000';
                     tokens = '-9999';
-                }
-                if (tokens != '-9999')
-                    tokens = parseFloat(tokens).toFixed(4);
+                } else tokens = parseFloat(tokens).toFixed(4);
                 tokens = space.spaceBefore(18, tokens);
                 if (i === 0) {
                     index = Number(index);
@@ -291,7 +293,9 @@ function writeAll(exportPath, project, well, idDataset, idCurves, username, s3, 
         fs.mkdirSync(lasFilePath);
     }
 
-    let dataset = well.datasets.find(function (dataset) { return dataset.idDataset == idDataset; });
+    let dataset = well.datasets.find(function (dataset) {
+        return dataset.idDataset == idDataset;
+    });
     if (dataset) {
         let fileName = dataset.name + "_" + well.name + "_" + Date.now() + '.las'
         fileName = fileName.replace(/\//g, "-");
@@ -313,4 +317,5 @@ function writeAll(exportPath, project, well, idDataset, idCurves, username, s3, 
         callback(null, null);
     }
 }
+
 module.exports.writeAll = writeAll;

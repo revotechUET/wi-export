@@ -110,11 +110,12 @@ async function writeDataset(csvStream, writeStream, project, well, dataset, idCu
                 let tokens = line.toString('utf8').split("||");
                 let index = tokens.toString().substring(0, tokens.toString().indexOf(" "));
                 tokens = tokens.toString().substring(tokens.toString().indexOf(" ") + 1);
-                if (tokens == null || tokens == NaN || tokens.substring(0,4) == 'null' || tokens == 'NaN' || !tokens) {
+                let _ = require('lodash');
+                if (!_.isFinite(parseFloat(tokens))) {
                     // let nullHeader = well.well_headers.find(header => {
                     //     return header.header == "NULL";
                     // })
-                    // tokens = nullHeader ? nullHeader.value : '-999.0000';
+                    // tokens = nullHeader ? nullHeader.value :  '-999.0000';
                     tokens = '-9999';
                 }
                 if (i === 0) {
