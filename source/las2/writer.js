@@ -223,7 +223,6 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
 
                     depth = space.spaceBefore(15, depth);
                     tokens = depth + tokens;
-                    top += step;
                 }
                 if (i !== readStreams.length - 1) {
                     writeStream.write(tokens, function () {
