@@ -40,7 +40,7 @@ function writeHeader(csvStream, well, idCurves) {
     let unitArr = ['.', '.', _wellUnit || 'M'];
     async.eachOfSeries(well.datasets, function (dataset, index, nextDataset) {
         async.eachOfSeries(dataset.curves, function (curve, idx, nextCurve) {
-            if(idCurves.find(function (id) {return id == curve.idCurve}) && curve.idCurve != MDCurve) {
+            if(idCurves.find(function (id) {return id == curve.idCurve}) && curve.name != MDCurve) {
                 console.log('curve', curve.name, curve.unit);
                 columnArr.push(curve.name);
                 unitArr.push(curve.unit);

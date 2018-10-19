@@ -303,7 +303,7 @@ function getWellBottomDepth(well) {
 
 function getWellStep(well) {
     let datasets = well.datasets;
-    return datasets[0] ? convertUnit(datasets[0].step, dataset[0].unit, 'M') : 0;
+    return datasets[0] ? convertUnit(datasets[0].step, datasets[0].unit, 'M') : 0;
 }
 
 module.exports.writeAll = writeAll;
