@@ -220,7 +220,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                     index = Number(index);
                     let depth, hasDepth;
                     if (step == 0 || hasDepth) {
-                        depth = index.toFixed(4);
+                        depth = convertUnit(index, 'M', dataset.unit).toFixed(4);
                         hasDepth = true;
                     } else {
                         depth = top.toFixed(4);

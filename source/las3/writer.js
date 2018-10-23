@@ -181,7 +181,7 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
                     index = Number(index);
                     let depth;
                     if (step == 0 || hasDepth) {
-                        depth = index.toFixed(4).toString() + ',';
+                        depth = convertUnit(index, 'M', desUnit).toFixed(4) + ',';
                         hasDepth = true;
                     } else {
                         depth = top.toFixed(4).toString() + ',';
@@ -271,13 +271,13 @@ function writeAll(exportPath, project, well, datasetObjs, username, s3, curveMod
         _wellTopDepth = dataset.top;
         _wellStep = dataset.step;
         _wellUnit = dataset.unit;
+        if (project) {
+            _wellTopDepth = convertUnit(_wellTopDepth, 'M', _wellUnit);
+            _wellBottomDepth = convertUnit(_wellBottomDepth, 'M', _wellUnit);
+            _wellStep = convertUnit(_wellStep, 'M', _wellUnit);
+        }
     }
-    if (project) {
-        _wellTopDepth = convertUnit(_wellTopDepth, 'M', _wellUnit);
-        _wellBottomDepth = convertUnit(_wellBottomDepth, 'M', _wellUnit);
-        _wellStep = convertUnit(_wellStep, 'M', _wellUnit);
-    }
-
+    
     let fileName = well.name + "_" + Date.now() + '.las'
     fileName = fileName.replace(/\//g, "-");
     lasFilePath = path.join(lasFilePath, fileName);

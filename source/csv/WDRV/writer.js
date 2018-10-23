@@ -124,7 +124,7 @@ async function writeDataset(csvStream, writeStream, project, well, dataset, idCu
                 }
                 if (i === 0) {
                     let depth;
-                    if (step == 0) depth = convertUnit(Number(index), fromUnit, _wellUnit).toFixed(4);
+                    if (step == 0) depth = convertUnit(Number(index), 'M', _wellUnit).toFixed(4);
                     else depth = top.toFixed(4);
                     lineArr = generateLineArr(well.name, dataset.name, depth, numOfPreCurve);
                     top += step;

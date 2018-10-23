@@ -133,7 +133,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                 }
                 if (i === 0) {
                     let depth;
-                    if (step == 0) depth = convertUnit(Number(index), fromUnit, desUnit).toFixed(4);
+                    if (step == 0) depth = convertUnit(Number(index), 'M', desUnit).toFixed(4);
                     else depth = top.toFixed(4);
                     tokenArr.push(depth);
                     top += step;
