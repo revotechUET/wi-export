@@ -42,32 +42,34 @@ function writeVersion(lasFilePath) {
 function writeWellHeader(lasFilePath, well) {
     let wellHeaders = well.well_headers;
     fs.appendFileSync(lasFilePath, '~Well\r\n');
-    fs.appendFileSync(lasFilePath, '#MNEM.UNIT          DATA                                DESCRIPTION\r\n');
-    fs.appendFileSync(lasFilePath, '#----- ----        -----------------                   -----------\r\n');
+    fs.appendFileSync(lasFilePath, '#_______________________________________________________________________________\r\n');
+    fs.appendFileSync(lasFilePath, '#\r\n#PARAMETER_NAME    .UNIT     VALUE                         : DESCRIPTION\r\n#\r\n');
+    fs.appendFileSync(lasFilePath, '#_______________________________________________________________________________\r\n');
+
     //append start depth, stop depth and step
     let wellUnit = _wellUnit || well.unit || 'M';
-    let strtHeader = space.spaceAfter(20, 'STRT  .' + wellUnit);
-    let stopHeader = space.spaceAfter(20, 'STOP  .' + wellUnit);
-    let stepHeader = space.spaceAfter(20, 'STEP  .' + wellUnit);
-    let totalHeader = space.spaceAfter(20, 'TOTAL DEPTH  .' + wellUnit);
-    strtHeader += space.spaceAfter(36, Number.parseFloat(_wellTopDepth).toFixed(4)) + ": Top Depth";
-    stopHeader += space.spaceAfter(36, Number.parseFloat(_wellBottomDepth).toFixed(4)) + ": Bottom Depth";
-    stepHeader += space.spaceAfter(36, Number.parseFloat(_wellStep).toFixed(4)) + ": Step";
-    totalHeader += space.spaceAfter(36,
+    let strtHeader = space.spaceAfter(19, 'STRT') + space.spaceAfter(10, '.' + wellUnit);
+    let stopHeader = space.spaceAfter(19, 'STOP') + space.spaceAfter(10, '.' + wellUnit);
+    let stepHeader = space.spaceAfter(19, 'STEP') + space.spaceAfter(10, '.' + wellUnit);
+    let totalHeader = space.spaceAfter(19, 'TOTAL DEPTH') + space.spaceAfter(10, '.' + wellUnit);
+    strtHeader += space.spaceAfter(30, Number.parseFloat(_wellTopDepth).toFixed(4)) + ": Top Depth";
+    stopHeader += space.spaceAfter(30, Number.parseFloat(_wellBottomDepth).toFixed(4)) + ": Bottom Depth";
+    stepHeader += space.spaceAfter(30, Number.parseFloat(_wellStep).toFixed(4)) + ": Step";
+    totalHeader += space.spaceAfter(30,
         (Number.parseFloat(_wellBottomDepth) -
             Number.parseFloat(_wellTopDepth)).toFixed(4)) + ": Total Depth";
 
     fs.appendFileSync(lasFilePath, strtHeader + '\r\n' + stopHeader + '\r\n' + stepHeader + '\r\n' + totalHeader + '\r\n');
     //append other headers
-    let nullHeader = space.spaceAfter(20, 'NULL' + '.') + space.spaceAfter(36, '-9999') + ": NULL VALUE\r\n";
+    let nullHeader = space.spaceAfter(19, 'NULL') + space.spaceAfter(10, '.') + space.spaceAfter(30, '-9999') + ": NULL VALUE\r\n";
     fs.appendFileSync(lasFilePath, nullHeader);
 
-    let wellHeader = space.spaceAfter(20, 'WELL' + '.') + space.spaceAfter(36, well.name) + ": " + 'WELL NAME' + '\r\n';
+    let wellHeader = space.spaceAfter(19, 'WELL') + space.spaceAfter(10, '.') + space.spaceAfter(30, well.name) + ": " + 'WELL NAME' + '\r\n';
     fs.appendFileSync(lasFilePath, wellHeader);
 
     for (i in wellHeaders) {
-        if (wellHeaders[i].value && wellHeaders[i].header !== 'filename' && wellHeaders[i].header !== 'COMPANY' && wellHeaders[i].header !== 'STRT' && wellHeaders[i].header !== 'STOP' && wellHeaders[i].header !== 'STEP' && wellHeaders[i].header != 'NULL' && wellHeaders[i].header != 'WELL' && wellHeaders[i].header != 'TOTAL DEPTH') {
-            let header = space.spaceAfter(20, wellHeaders[i].header.toString() + '  .' + wellHeaders[i].unit) + space.spaceAfter(36, wellHeaders[i].value) + ": " + wellHeaders[i].description + '\r\n';
+        if (wellHeaders[i].header !== 'filename' && wellHeaders[i].header !== 'COMPANY' && wellHeaders[i].header !== 'STRT' && wellHeaders[i].header !== 'STOP' && wellHeaders[i].header !== 'STEP' && wellHeaders[i].header != 'NULL' && wellHeaders[i].header != 'WELL' && wellHeaders[i].header != 'TOTAL DEPTH') {
+            let header = space.spaceAfter(19, wellHeaders[i].header.toString()) + space.spaceAfter(10, '.' + wellHeaders[i].unit) + space.spaceAfter(30, wellHeaders[i].value) + ": " + wellHeaders[i].description + '\r\n';
             fs.appendFileSync(lasFilePath, header);
         }
     }
@@ -75,19 +77,21 @@ function writeWellHeader(lasFilePath, well) {
 
 async function writeDataset(lasFilePath, fileName, project, well, dataset, idCurves, s3, curveModel, curveBasePath, callback) {
     fs.appendFileSync(lasFilePath, '\r\n~' + dataset.name.toUpperCase().replace(/ /g, ".").replace(/_DATA/, "") + '_PARAMETER\r\n');
-    fs.appendFileSync(lasFilePath, '#MNEM.UNIT                    VALUE                        DESCRIPTION\r\n');
-    fs.appendFileSync(lasFilePath, '#--------------- ---         ------------                 -----------------\r\n\r\n');
-    fs.appendFileSync(lasFilePath, space.spaceAfter(16, 'SET') + space.spaceAfter(14, '.') + space.spaceAfter(28, dataset.name) + ':\r\n');
+    fs.appendFileSync(lasFilePath, '#_______________________________________________________________________________\r\n');
+    fs.appendFileSync(lasFilePath, '#\r\n#PARAMETER_NAME    .UNIT     VALUE                         : DESCRIPTION\r\n#\r\n');
+    fs.appendFileSync(lasFilePath, '#_______________________________________________________________________________\r\n');
+    fs.appendFileSync(lasFilePath, space.spaceAfter(19, 'SET') + space.spaceAfter(10, '.') + space.spaceAfter(30, dataset.name) + ':\r\n');
     if (dataset.dataset_params && dataset.dataset_params.length > 0) {
         for (param of dataset.dataset_params) {
-            let line = space.spaceAfter(16, param.mnem) + space.spaceAfter(14, '.' + param.unit) + space.spaceAfter(28, param.value) + ': ' + param.description + '\r\n';
+            let line = space.spaceAfter(19, param.mnem) + space.spaceAfter(10, '.' + param.unit) + space.spaceAfter(30, param.value) + ': ' + param.description + '\r\n';
             fs.appendFileSync(lasFilePath, line);
         }
     }
     fs.appendFileSync(lasFilePath, '\r\n\r\n~' + dataset.name.toUpperCase().replace(/ /g, ".").replace(/_DATA/, "") + '_DEFINITION\r\n');
-    fs.appendFileSync(lasFilePath, '#MNEM.UNIT                 LOG CODE                  CURVE DESCRIPTION\r\n');
-    fs.appendFileSync(lasFilePath, '#----------- ----         ------------              -----------------\r\n\r\n');
-    fs.appendFileSync(lasFilePath, 'DEPTH       .M                                      : Depth    {F}\r\n');
+    fs.appendFileSync(lasFilePath, '#_______________________________________________________________________________\r\n#\r\n');
+    fs.appendFileSync(lasFilePath, '#LOGNAME           .UNIT     LOG_ID                        : DESCRIPTION\r\n#\r\n');
+    fs.appendFileSync(lasFilePath, '#_______________________________________________________________________________\r\n');
+    fs.appendFileSync(lasFilePath, space.spaceAfter(19, 'DEPTH') + space.spaceAfter(40, '.' + dataset.unit || 'M')+ ': Depth    {F}\r\n');
 
     let desUnit = dataset.unit || 'M';
     if (!project) {
@@ -107,12 +111,12 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
         if (curve && curve.name != MDCurve) {
             let stream;
             if (project) { //export from project
-                line = space.spaceAfter(12, curve.name) + '.' + space.spaceAfter(39, curve.unit) + ': ' + curve.description + '\r\n';
+                line = space.spaceAfter(19, curve.name) + space.spaceAfter(40, '.' + curve.unit) + ': ' + curve.description + '\r\n';
                 let curvePath = await hashDir.createPath(curveBasePath, project.createdBy + project.name + well.name + dataset.name + curve.name, curve.name + '.txt');
                 console.log('curvePath', curvePath);
                 stream = fs.createReadStream(curvePath);
             } else { //export from inventory
-                line = space.spaceAfter(12, curve.name) + '.' + space.spaceAfter(39, curve.curve_revisions[0].unit) + ': ' + curve.description + '\r\n';
+                line = space.spaceAfter(19, curve.name) + space.spaceAfter(40, '.' + curve.curve_revisions[0].unit) + ': ' + curve.description + '\r\n';
                 let curvePath = await curveModel.getCurveKey(curve.curve_revisions[0]);
                 console.log('curvePath=========', curvePath);
                 try {
