@@ -94,12 +94,13 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
     fs.appendFileSync(lasFilePath, space.spaceAfter(19, 'DEPTH') + space.spaceAfter(40, '.' + dataset.unit || 'M')+ ': Depth    {F}\r\n');
 
     let desUnit = dataset.unit || 'M';
-    if (!project) {
-        desUnit = 'M';
+    let fromUnit = dataset.unit || 'M';
+    if (project) {
+        fromUnit = 'M';
     }
-    let top = convertUnit(Number.parseFloat(dataset.top), 'M', desUnit);
-    let bottom = convertUnit(Number.parseFloat(dataset.bottom), 'M', desUnit);
-    let step = convertUnit(Number.parseFloat(dataset.step), 'M', desUnit);
+    let top = convertUnit(Number.parseFloat(dataset.top), fromUnit, desUnit);
+    let bottom = convertUnit(Number.parseFloat(dataset.bottom), fromUnit, desUnit);
+    let step = convertUnit(Number.parseFloat(dataset.step), fromUnit, desUnit);
     let readStreams = [];
     let writeStream = fs.createWriteStream(lasFilePath, {flags: 'a'})
 
