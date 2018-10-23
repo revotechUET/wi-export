@@ -131,9 +131,12 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
         well.username = project.createdBy;
     }
 
-    let top = convertUnit(Number.parseFloat(dataset.top), 'M', dataset.unit);
-    let bottom = convertUnit(Number.parseFloat(dataset.bottom), 'M', dataset.unit);
-    let step = convertUnit(Number.parseFloat(dataset.step), 'M', dataset.unit);
+    let fromUnit = dataset.unit || 'M';
+    if(project) fromUnit = 'M';
+
+    let top = convertUnit(Number.parseFloat(dataset.top), fromUnit, dataset.unit);
+    let bottom = convertUnit(Number.parseFloat(dataset.bottom), fromUnit, dataset.unit);
+    let step = convertUnit(Number.parseFloat(dataset.step), fromUnit, dataset.unit);
     let readStreams = [];
     let writeStream = fs.createWriteStream(lasFilePath, { flags: 'a' });
     let curveColumns = '~A        DEPTH';
