@@ -271,6 +271,11 @@ function writeAll(exportPath, project, well, datasetObjs, username, s3, curveMod
         _wellStep = dataset.step;
         _wellUnit = dataset.unit;
     }
+    if (project) {
+        _wellTopDepth = convertUnit(_wellTopDepth, 'M', dataset.unit);
+        _wellBottomDepth = convertUnit(_wellBottomDepth, 'M', dataset.unit);
+        _wellStep = convertUnit(_wellStep, 'M', dataset.unit);
+    }
 
     let fileName = well.name + "_" + Date.now() + '.las'
     fileName = fileName.replace(/\//g, "-");

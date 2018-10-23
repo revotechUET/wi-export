@@ -43,14 +43,16 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
         well, s3, curveModel are null
     */
    let desUnit = dataset.unit || 'M';
+   let fromUnit = dataset.unit || 'M';
     if (project) {  //export from project
         well = project.wells[0];
         well.username = project.createdBy;
+        fromUnit = 'M';
     }
  
-    let top = convertUnit(Number.parseFloat(dataset.top), 'M', desUnit);
-    let bottom = convertUnit(Number.parseFloat(dataset.bottom), 'M', desUnit);
-    let step = convertUnit(Number.parseFloat(dataset.step), 'M', desUnit);
+    let top = convertUnit(Number.parseFloat(dataset.top), fromUnit, desUnit);
+    let bottom = convertUnit(Number.parseFloat(dataset.bottom), fromUnit, desUnit);
+    let step = convertUnit(Number.parseFloat(dataset.step), fromUnit, desUnit);
     let readStreams = [];
     var csvStream = csv.createWriteStream({ headers: false });
     let writeStream = fs.createWriteStream(lasFilePath, { flags: 'a' });
@@ -131,7 +133,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                 }
                 if (i === 0) {
                     let depth;
-                    if (step == 0) depth = Number(index).toFixed(4);
+                    if (step == 0) depth = convertUnit(Number(index), fromUnit, desUnit).toFixed(4);
                     else depth = top.toFixed(4);
                     tokenArr.push(depth);
                     top += step;
