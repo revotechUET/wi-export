@@ -83,8 +83,10 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
     fs.appendFileSync(lasFilePath, space.spaceAfter(19, 'SET') + space.spaceAfter(10, '.') + space.spaceAfter(30, dataset.name) + ':\r\n');
     if (dataset.dataset_params && dataset.dataset_params.length > 0) {
         for (param of dataset.dataset_params) {
-            let line = space.spaceAfter(19, param.mnem) + space.spaceAfter(10, '.' + param.unit) + space.spaceAfter(30, param.value) + ': ' + param.description + '\r\n';
-            fs.appendFileSync(lasFilePath, line);
+            if(param.value || param.description ||  param.unit) {
+                let line = space.spaceAfter(19, param.mnem) + space.spaceAfter(10, '.' + param.unit) + space.spaceAfter(30, param.value) + ': ' + param.description + '\r\n';
+                fs.appendFileSync(lasFilePath, line);
+            }
         }
     }
     fs.appendFileSync(lasFilePath, '\r\n\r\n~' + dataset.name.toUpperCase().replace(/ /g, ".").replace(/_DATA/, "") + '_DEFINITION\r\n');

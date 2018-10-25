@@ -147,16 +147,6 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                 } else {
                     csvStream.write(tokenArr, function () {
                         writeLine++;
-                        if (readStreams.numLine && readStreams.numLine === writeLine) {
-                            csvStream.end();
-                            writeStream.on('finish', function () {
-                                callback(null, {
-                                    fileName: fileName,
-                                    wellName: well.name,
-                                    datasetName: dataset.name
-                                });
-                            })
-                        }
                     });
                     tokenArr = [];
                     readStreams[i].pause();
@@ -176,6 +166,16 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                 if (i != readStreams.length - 1) {
                     console.log('---', i, readStreams.length - 1);
                     readStreams[i + 1].resume();
+                }
+                if (readStreams.numLine && readStreams.numLine === writeLine) {
+                    csvStream.end();
+                    writeStream.on('finish', function () {
+                        callback(null, {
+                            fileName: fileName,
+                            wellName: well.name,
+                            datasetName: dataset.name
+                        });
+                    })
                 }
             })
         }
