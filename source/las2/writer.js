@@ -115,7 +115,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
     fs.appendFileSync(lasFilePath, space.spaceAfter(WHLEN1, "SET") + space.spaceAfter(10, '.') + space.spaceAfter(WHLEN3, dataset.name) + ': \r\n');
     if (dataset.dataset_params) {
         for (param of dataset.dataset_params) {
-            if(param.value || param.description ||  param.unit)
+            if(param.mnem != 'SET' & (param.value || param.description ||  param.unit))
                 fs.appendFileSync(lasFilePath, space.spaceAfter(WHLEN1, param.mnem) + space.spaceAfter(WHLEN2, '.' + param.unit) + space.spaceAfter(WHLEN3, param.value) + ": " + param.description + '\r\n');
         }
     }
