@@ -64,9 +64,9 @@ async function writeDataset(csvStream, writeStream, project, well, dataset, idCu
     if(project) {
         fromUnit = 'M';
     }
-    let top = convertUnit(Number.parseFloat(dataset.top), fromUnit, _wellUnit);
-    let bottom = convertUnit(Number.parseFloat(dataset.bottom), fromUnit, _wellUnit);
-    let step = convertUnit(Number.parseFloat(dataset.step), fromUnit, _wellUnit);
+    let top = Number.parseFloat(convertUnit(Number.parseFloat(dataset.top), fromUnit, _wellUnit).toFixed(4));
+    let bottom = Number.parseFloat(convertUnit(Number.parseFloat(dataset.bottom), fromUnit, _wellUnit).toFixed(4));
+    let step = Number.parseFloat(convertUnit(Number.parseFloat(dataset.step), fromUnit, _wellUnit).toFixed(4));
     let readStreams = [];
 
     for (idCurve of idCurves) {

@@ -100,9 +100,9 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
     if (project) {
         fromUnit = 'M';
     }
-    let top = convertUnit(Number.parseFloat(dataset.top), fromUnit, desUnit);
-    let bottom = convertUnit(Number.parseFloat(dataset.bottom), fromUnit, desUnit);
-    let step = convertUnit(Number.parseFloat(dataset.step), fromUnit, desUnit);
+    let top = Number.parseFloat(convertUnit(Number.parseFloat(dataset.top), fromUnit, desUnit).toFixed(4));
+    let bottom = Number.parseFloat(convertUnit(Number.parseFloat(dataset.bottom), fromUnit, desUnit).toFixed(4));
+    let step = Number.parseFloat(convertUnit(Number.parseFloat(dataset.step), fromUnit, desUnit).toFixed(4));
     let readStreams = [];
     let writeStream = fs.createWriteStream(lasFilePath, {flags: 'a'})
 

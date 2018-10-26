@@ -50,9 +50,9 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
         fromUnit = 'M';
     }
  
-    let top = convertUnit(Number.parseFloat(dataset.top), fromUnit, desUnit);
-    let bottom = convertUnit(Number.parseFloat(dataset.bottom), fromUnit, desUnit);
-    let step = convertUnit(Number.parseFloat(dataset.step), fromUnit, desUnit);
+    let top = Number.parseFloat(convertUnit(Number.parseFloat(dataset.top), fromUnit, desUnit).toFixed(4));
+    let bottom = Number.parseFloat(convertUnit(Number.parseFloat(dataset.bottom), fromUnit, desUnit).toFixed(4));
+    let step = Number.parseFloat(convertUnit(Number.parseFloat(dataset.step), fromUnit, desUnit).toFixed(4));
     let readStreams = [];
     var csvStream = csv.createWriteStream({ headers: false });
     let writeStream = fs.createWriteStream(lasFilePath, { flags: 'a' });
