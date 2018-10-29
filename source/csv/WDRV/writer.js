@@ -138,6 +138,9 @@ async function writeDataset(csvStream, writeStream, project, well, dataset, idCu
                 } else {
                     csvStream.write(lineArr, function () {
                         writeLine++;
+                        if (readStreams.numLine && readStreams.numLine === writeLine) {
+                            callback();
+                        }
                     });
                     lineArr = generateLineArr(well.name, dataset.name, numOfPreCurve);
                     readStreams[i].pause();

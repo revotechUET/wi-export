@@ -69,7 +69,7 @@ function writeWellHeader(lasFilePath, well, dataset, from) {
     let stepValue = from == 'inventory' ? dataset.step : convertUnit(Number.parseFloat(dataset.step), 'M', wellUnit);
     stepHeader += space.spaceAfter(WHLEN3, Number.parseFloat(stepValue).toFixed(4)) + ": Step";
 
-    totalHeader = space.spaceAfter(WHLEN1, 'TOTAL DEPTH') + space.spaceAfter(WHLEN2, '.' + wellUnit);
+    totalHeader = space.spaceAfter(WHLEN1, 'TD') + space.spaceAfter(WHLEN2, '.' + wellUnit);
     let totalValue = Number.parseFloat(bottomValue) - Number.parseFloat(topValue);
     console.log('------', topValue, bottomValue, totalValue);
     totalHeader += space.spaceAfter(WHLEN3, Number.parseFloat(totalValue).toFixed(4)) + ": Total Depth";
@@ -91,7 +91,7 @@ function writeWellHeader(lasFilePath, well, dataset, from) {
     //     fs.appendFileSync(lasFilePath, header);
     // }
     for (i in wellHeaders) {
-        if (wellHeaders[i].header !== 'filename' && wellHeaders[i].header !== 'STRT' && wellHeaders[i].header !== 'STOP' && wellHeaders[i].header !== 'STEP' && wellHeaders[i].header !== 'NULL' && wellHeaders[i].header !== 'WELL' && wellHeaders[i].header != 'TOTAL DEPTH') {
+        if (wellHeaders[i].header !== 'filename' && wellHeaders[i].header !== 'STRT' && wellHeaders[i].header !== 'STOP' && wellHeaders[i].header !== 'STEP' && wellHeaders[i].header !== 'NULL' && wellHeaders[i].header !== 'WELL') {
             let header = space.spaceAfter(WHLEN1, wellHeaders[i].header.toString()) + space.spaceAfter(WHLEN2, '.' + wellHeaders[i].unit) + space.spaceAfter(WHLEN3, wellHeaders[i].value) + ": " + wellHeaders[i].description + '\r\n';
             fs.appendFileSync(lasFilePath, header);
         }

@@ -10,19 +10,19 @@ let hashDir = wiImport.hashDir;
 let _unitTable = null;
 
 module.exports.setUnitTable = setUnitTable;
-function setUnitTable (unitTable) {
+function setUnitTable(unitTable) {
     _unitTable = unitTable;
 }
 
 
 function convertUnit(value, fromUnit, desUnit) {
     //todo
-    if(!_unitTable) return value;
+    if (!_unitTable) return value;
     let unitTable = _unitTable;
     let fromRate = unitTable[fromUnit];
     let desRate = unitTable[desUnit];
     if (fromRate && desRate) {
-        
+
         return value * desRate / fromRate;
     }
     return value;
@@ -42,14 +42,14 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
     /*export from project
         well, s3, curveModel are null
     */
-   let desUnit = dataset.unit || 'M';
-   let fromUnit = dataset.unit || 'M';
+    let desUnit = dataset.unit || 'M';
+    let fromUnit = dataset.unit || 'M';
     if (project) {  //export from project
         well = project.wells[0];
         well.username = project.createdBy;
         fromUnit = 'M';
     }
- 
+
     let top = Number.parseFloat(convertUnit(Number.parseFloat(dataset.top), fromUnit, desUnit).toFixed(4));
     let bottom = Number.parseFloat(convertUnit(Number.parseFloat(dataset.bottom), fromUnit, desUnit).toFixed(4));
     let step = Number.parseFloat(convertUnit(Number.parseFloat(dataset.step), fromUnit, desUnit).toFixed(4));
@@ -74,9 +74,9 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
             if (!project) { //export from inventory
                 let curvePath = await curveModel.getCurveKey(curve.curve_revisions[0]);
                 console.log('curvePath=========', curvePath);
-                try{
+                try {
                     stream = await s3.getData(curvePath);
-                } catch(e) {
+                } catch (e) {
                     console.log('=============NOT FOUND CURVE FROM S3', e);
                     callback(e);
                 }
@@ -93,7 +93,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
         console.log('hiuhiu');
         csvStream.write(curveNameArr);
         csvStream.write(curveUnitArr);
-        if(step == 0) {
+        if (step == 0) {
             callback(null, {
                 fileName: fileName,
                 wellName: well.name,
@@ -147,6 +147,16 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                 } else {
                     csvStream.write(tokenArr, function () {
                         writeLine++;
+                        if (readStreams.numLine && readStreams.numLine === writeLine) {
+                            csvStream.end();
+                            // writeStream.on('finish', function () {
+                            callback(null, {
+                                fileName: fileName,
+                                wellName: well.name,
+                                datasetName: dataset.name
+                            });
+                            // })
+                        }
                     });
                     tokenArr = [];
                     readStreams[i].pause();
@@ -169,13 +179,13 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                 }
                 if (readStreams.numLine && readStreams.numLine === writeLine) {
                     csvStream.end();
-                    writeStream.on('finish', function () {
-                        callback(null, {
-                            fileName: fileName,
-                            wellName: well.name,
-                            datasetName: dataset.name
-                        });
-                    })
+                    // writeStream.on('finish', function () {
+                    callback(null, {
+                        fileName: fileName,
+                        wellName: well.name,
+                        datasetName: dataset.name
+                    });
+                    // })
                 }
             })
         }
@@ -208,7 +218,7 @@ function writeAll(exportPath, project, well, idDataset, idCurves, username, s3, 
         let fileName = dataset.name + "_" + well.name + "_" + Date.now() + '.csv'
         fileName = fileName.replace(/\//g, "-");
         lasFilePath = path.join(lasFilePath, fileName);
-        
+
         writeCurve(lasFilePath, exportPath, fileName, project, well, dataset, idCurves, s3, curveModel, curveBasePath, function (err, rs) {
             console.log('writeAll callback called', err, rs);
             if (err) {
