@@ -68,7 +68,8 @@ function writeWellHeader(lasFilePath, well) {
     fs.appendFileSync(lasFilePath, wellHeader);
 
     for (i in wellHeaders) {
-        if (wellHeaders[i].header !== 'filename' && wellHeaders[i].header !== 'COMPANY' && wellHeaders[i].header !== 'STRT' && wellHeaders[i].header !== 'STOP' && wellHeaders[i].header !== 'STEP' && wellHeaders[i].header != 'NULL' && wellHeaders[i].header != 'WELL') {
+        if (wellHeaders[i].header !== 'filename' && wellHeaders[i].header !== 'COMPANY' && wellHeaders[i].header !== 'STRT' && wellHeaders[i].header !== 'STOP' && wellHeaders[i].header !== 'STEP' && wellHeaders[i].header != 'NULL' && wellHeaders[i].header != 'WELL'
+        && (header.value || header.description ||  header.unit)) {
             let header = space.spaceAfter(19, wellHeaders[i].header.toString()) + space.spaceAfter(10, '.' + wellHeaders[i].unit) + space.spaceAfter(30, wellHeaders[i].value) + ": " + wellHeaders[i].description + '\r\n';
             fs.appendFileSync(lasFilePath, header);
         }

@@ -91,7 +91,8 @@ function writeWellHeader(lasFilePath, well, dataset, from) {
     //     fs.appendFileSync(lasFilePath, header);
     // }
     for (i in wellHeaders) {
-        if (wellHeaders[i].header !== 'filename' && wellHeaders[i].header !== 'STRT' && wellHeaders[i].header !== 'STOP' && wellHeaders[i].header !== 'STEP' && wellHeaders[i].header !== 'NULL' && wellHeaders[i].header !== 'WELL') {
+        if (wellHeaders[i].header !== 'filename' && wellHeaders[i].header !== 'STRT' && wellHeaders[i].header !== 'STOP' && wellHeaders[i].header !== 'STEP' && wellHeaders[i].header !== 'NULL' && wellHeaders[i].header !== 'WELL'
+        && (header.value || header.description ||  header.unit)) {
             let header = space.spaceAfter(WHLEN1, wellHeaders[i].header.toString()) + space.spaceAfter(WHLEN2, '.' + wellHeaders[i].unit) + space.spaceAfter(WHLEN3, wellHeaders[i].value) + ": " + wellHeaders[i].description + '\r\n';
             fs.appendFileSync(lasFilePath, header);
         }
@@ -115,7 +116,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
     fs.appendFileSync(lasFilePath, space.spaceAfter(WHLEN1, "SET") + space.spaceAfter(10, '.') + space.spaceAfter(WHLEN3, dataset.name) + ': \r\n');
     if (dataset.dataset_params) {
         for (param of dataset.dataset_params) {
-            if(param.mnem != 'SET' & (param.value || param.description ||  param.unit))
+            if(param.mnem != 'SET')
                 fs.appendFileSync(lasFilePath, space.spaceAfter(WHLEN1, param.mnem) + space.spaceAfter(WHLEN2, '.' + param.unit) + space.spaceAfter(WHLEN3, param.value) + ": " + param.description + '\r\n');
         }
     }
