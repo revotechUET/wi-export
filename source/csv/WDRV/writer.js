@@ -206,7 +206,7 @@ function writeAll(exportPath, project, well, datasetObjs, username, s3, curveMod
     let writeStream = fs.createWriteStream(lasFilePath, { flags: 'a' });
     let idCurvesArr = [];
     csvStream.pipe(writeStream);
-    writeHeader(csvStream, well, getIdCurvesArr(datasetObjs));
+    //writeHeader(csvStream, well, getIdCurvesArr(datasetObjs));
 
     let numOfPreCurve = 0;
     async.eachOfSeries(datasetObjs, function (obj, index, next) {

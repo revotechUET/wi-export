@@ -57,7 +57,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
     var csvStream = csv.createWriteStream({ headers: false });
     let writeStream = fs.createWriteStream(lasFilePath, { flags: 'a' });
     csvStream.pipe(writeStream);
-    writeHeader(csvStream, well);
+    //writeHeader(csvStream, well);
 
     let curveNameArr = [];
     let curveUnitArr = [];
