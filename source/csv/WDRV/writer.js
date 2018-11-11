@@ -31,10 +31,10 @@ function convertUnit(value, fromUnit, desUnit) {
 
 function writeHeader(csvStream, well, idCurves) {
     console.log('---------idCurves', idCurves);
-    let headerArr = ['$Csv :WELL ', 'Dataset'];
-    headerArr.push(well.name)
-    csvStream.write(headerArr);
-    csvStream.write([]);
+    //let headerArr = ['$Csv :WELL ', 'Dataset'];
+    //headerArr.push(well.name)
+    //csvStream.write(headerArr);
+    //csvStream.write([]);
 
     let columnArr = ['WELL', 'Dataset', 'Depth'];
     let unitArr = ['.', '.', _wellUnit || 'M'];
@@ -206,7 +206,7 @@ function writeAll(exportPath, project, well, datasetObjs, username, s3, curveMod
     let writeStream = fs.createWriteStream(lasFilePath, { flags: 'a' });
     let idCurvesArr = [];
     csvStream.pipe(writeStream);
-    //writeHeader(csvStream, well, getIdCurvesArr(datasetObjs));
+    writeHeader(csvStream, well, getIdCurvesArr(datasetObjs));
 
     let numOfPreCurve = 0;
     async.eachOfSeries(datasetObjs, function (obj, index, next) {
