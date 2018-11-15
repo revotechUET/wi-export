@@ -31,10 +31,10 @@ function convertUnit(value, fromUnit, desUnit) {
 
 function writeHeader(csvStream, well, idCurves) {
     console.log('---------idCurves', idCurves);
-    let headerArr = ['$Csv :WELL ', 'Dataset'];
-    headerArr.push(well.name)
-    csvStream.write(headerArr);
-    csvStream.write([]);
+    //let headerArr = ['$Csv :WELL ', 'Dataset'];
+    //headerArr.push(well.name)
+    //csvStream.write(headerArr);
+    //csvStream.write([]);
 
     let columnArr = ['WELL', 'Dataset', 'Depth'];
     let unitArr = ['.', '.', _wellUnit || 'M'];
