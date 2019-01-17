@@ -2,6 +2,19 @@
 let crypto = require('crypto');
 const LEN = 8;
 
+function createDirSync(basePath, hash, dir) {
+	dir.push(hash.substr(0, LEN));
+	try {
+		fs.mkdirSync(basePath + '/' + dir.join('/'));
+	}
+	catch (err) {
+		if (err.errno !== -17) {
+			//console.log(err.message);
+		}
+	}
+	return hash.substr(LEN);
+}
+
 function createPath(basePath, hashString, fileName) {
 	//console.log("HASHSTRING : " + hashString);
 	let md5sum = crypto.createHash('md5');
