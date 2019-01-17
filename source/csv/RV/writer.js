@@ -3,10 +3,9 @@ let fs = require('fs');
 let byline = require('byline');
 let async = require('async');
 let space = require('../../space');
-let wiImport = require('wi-import');
 var csv = require('fast-csv');
 const MDCurve = '__MD';
-let hashDir = wiImport.hashDir;
+let hashDir = require('../../hash-dir');
 let _unitTable = null;
 
 module.exports.setUnitTable = setUnitTable;

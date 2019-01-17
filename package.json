@@ -43,7 +43,6 @@
     "fs": "0.0.1-security",
     "path": "^0.12.7",
     "request": "^2.87.0",
-    "wi-import": "^1.1.2"
   },
   "deprecated": false,
   "description": "Export wells to las files",
