@@ -219,7 +219,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                     // tokens = nullHeader ? nullHeader.value :  '-999.0000';
                     tokens = '-9999';
                 } else tokens = parseFloat(tokens).toFixed(4);
-                tokens = space.spaceBefore(18, tokens);
+                tokens = space.spaceBefore(17, tokens) + ' ';
                 if (i === 0) {
                     index = Number(index);
                     let depth, hasDepth;
@@ -231,7 +231,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                         top += step;
                     }
 
-                    depth = space.spaceBefore(15, depth);
+                    depth = space.spaceBefore(14, depth) + ' ';
                     tokens = depth + tokens;
                 }
                 if (i !== readStreams.length - 1) {

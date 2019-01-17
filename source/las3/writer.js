@@ -178,7 +178,7 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
                     // tokens = nullHeader ? nullHeader.value :  '-999.0000';
                     tokens = '-9999';
                 } else tokens = parseFloat(tokens).toFixed(4);
-                tokens = space.spaceBefore(15, tokens);
+                tokens = space.spaceBefore(14, tokens) + ' ';
                 if (i === 0) {
                     index = Number(index);
                     let depth;
@@ -189,7 +189,7 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
                         depth = top.toFixed(4).toString() + ',';
                         top += step;
                     }
-                    depth = space.spaceBefore(16, depth);
+                    depth = space.spaceBefore(15, depth) + ' ';
                     tokens = depth + tokens;
                 }
                 if (i !== readStreams.length - 1) {
