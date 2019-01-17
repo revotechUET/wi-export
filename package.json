@@ -42,7 +42,7 @@
     "fast-csv": "^2.4.1",
     "fs": "0.0.1-security",
     "path": "^0.12.7",
-    "request": "^2.87.0",
+    "request": "^2.87.0"
   },
   "deprecated": false,
   "description": "Export wells to las files",
