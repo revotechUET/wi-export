@@ -74,7 +74,10 @@ function writeWellHeader(lasFilePath, well) {
         }
     }
 }
-
+function normalizeName(name) {
+    let newName = name.replace(/[&\/\\#,+()$~%.'":*?<>{}\|]+/g,' ').trim().replace(/\s+/g,'_');
+    return newName;
+}
 async function writeDataset(lasFilePath, fileName, project, well, dataset, idCurves, s3, curveModel, curveBasePath, callback) {
     fs.appendFileSync(lasFilePath, '\r\n~' + dataset.name.toUpperCase().replace(/ /g, ".").replace(/_DATA/, "") + '_PARAMETER\r\n');
     fs.appendFileSync(lasFilePath, '#_______________________________________________________________________________\r\n');
@@ -113,13 +116,14 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
         let line;
         if (curve && curve.name != MDCurve) {
             let stream;
+            let normalizedCurveName = normalizeName(curve.name);
             if (project) { //export from project
-                line = space.spaceAfter(19, curve.name) + space.spaceAfter(40, '.' + curve.unit) + ': ' + curve.description + '\r\n';
+                line = space.spaceAfter(19, normalizedCurveName) + space.spaceAfter(40, '.' + curve.unit) + ': ' + curve.description + '\r\n';
                 let curvePath = await hashDir.createPath(curveBasePath, project.createdBy + project.name + well.name + dataset.name + curve.name, curve.name + '.txt');
                 console.log('curvePath', curvePath);
                 stream = fs.createReadStream(curvePath);
             } else { //export from inventory
-                line = space.spaceAfter(19, curve.name) + space.spaceAfter(40, '.' + curve.curve_revisions[0].unit) + ': ' + curve.description + '\r\n';
+                line = space.spaceAfter(19, normalizedCurveName) + space.spaceAfter(40, '.' + curve.curve_revisions[0].unit) + ': ' + curve.description + '\r\n';
                 let curvePath = await curveModel.getCurveKey(curve.curve_revisions[0]);
                 console.log('curvePath=========', curvePath);
                 try {
