@@ -171,7 +171,10 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                 fs.appendFileSync(lasFilePath, space.spaceAfter(WHLEN1, normalizedCurveName) + space.spaceAfter(WHLEN2 + WHLEN3, '.' + curve.unit) + ': ' + curve.description + '\r\n');
             }
             stream = byline.createStream(stream).pause();
-            readStreams.push(stream);
+            readStreams.push({
+                stream: stream,
+                type: curve.type
+            });
 
             if (idCurve == 0)
                 curveColumns += space.spaceBefore(15, normalizedCurveName);
@@ -205,26 +208,28 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                 });
             }
     } else {
-        readStreams[0].resume();
+        readStreams[0].stream.resume();
         for (let i = 0; i < readStreams.length; i++) {
-            console.log('~', readStreams[i].isPaused());
+            console.log('~', readStreams[i].stream.isPaused());
         }
         for (let i = 0; i < readStreams.length; i++) {
             let readLine = 0;
             let writeLine = 0;
-            readStreams[i].on('data', function (line) {
+            readStreams[i].stream.on('data', function (line) {
                 readLine++;
                 let tokens = line.toString('utf8').split("||");
                 let index = tokens.toString().substring(0, tokens.toString().indexOf(" "));
                 tokens = tokens.toString().substring(tokens.toString().indexOf(" ") + 1);
                 let _ = require('lodash');
-                if (!_.isFinite(parseFloat(tokens))) {
-                    // let nullHeader = well.well_headers.find(header => {
-                    //     return header.header == "NULL";
-                    // })
-                    // tokens = nullHeader ? nullHeader.value :  '-999.0000';
-                    tokens = '-9999';
-                } else tokens = parseFloat(tokens).toFixed(4);
+                if(readStreams[i].type != "TEXT"){
+                    if (!_.isFinite(parseFloat(tokens))) {
+                        // let nullHeader = well.well_headers.find(header => {
+                        //     return header.header == "NULL";
+                        // })
+                        // tokens = nullHeader ? nullHeader.value :  '-999.0000';
+                        tokens = '-9999';
+                    } else tokens = parseFloat(tokens).toFixed(4);
+                }
                 tokens = space.spaceBefore(17, tokens) + ' ';
                 if (i === 0) {
                     index = Number(index);
@@ -243,9 +248,9 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                 if (i !== readStreams.length - 1) {
                     writeStream.write(tokens, function () {
                     })
-                    readStreams[i].pause();
-                    if (readStreams[i + 1].isPaused()) {
-                        readStreams[i + 1].resume();
+                    readStreams[i].stream.pause();
+                    if (readStreams[i + 1].stream.isPaused()) {
+                        readStreams[i + 1].stream.resume();
                     }
                 } else {
                     writeStream.write(tokens + '\r\n', function () {
@@ -258,17 +263,17 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                             });
                         }
                     });
-                    readStreams[i].pause();
-                    if (readStreams[0].isPaused()) {
-                        readStreams[0].resume();
+                    readStreams[i].stream.pause();
+                    if (readStreams[0].stream.isPaused()) {
+                        readStreams[0].stream.resume();
                     }
                 }
             })
-            readStreams[i].on('error', function (err) {
+            readStreams[i].stream.on('error', function (err) {
                 console.log('-------', error);
                 callback(err);
             })
-            readStreams[i].on('end', function () {
+            readStreams[i].stream.on('end', function () {
                 if (!readStreams.numLine) {
                     readStreams.numLine = readLine;
                     console.log('numLine', readStreams.numLine);
@@ -279,7 +284,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                 console.log('END TIME', new Date(), readStreams.numLine);
                 if (i != readStreams.length - 1) {
                     console.log('---', i, readStreams.length - 1);
-                    readStreams[i + 1].resume();
+                    readStreams[i + 1].stream.resume();
                 }
             })
         }
