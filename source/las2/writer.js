@@ -44,6 +44,11 @@ function getWellUnit(well) {
     return unitHeader.value;
 }
 
+function normalizeName(name) {
+    let newName = name.replace(/[&\/\\#,+()$~%.'":*?<>{}\|]+/g,' ').trim().replace(/\s+/g,'_');
+    return newName;
+}
+
 function writeWellHeader(lasFilePath, well, dataset, from) {
     let wellHeaders = well.well_headers;
     fs.appendFileSync(lasFilePath, '~Well\r\n');
@@ -147,6 +152,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
             return curve.idCurve == idCurve
         });
         if (curve && curve.name != MDCurve) {
+            const normalizedCurveName = normalizeName(curve.name);
             let stream;
             if (!project) { //export from inventory
                 let curvePath = await curveModel.getCurveKey(curve.curve_revisions[0]);
@@ -157,20 +163,20 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                     console.log('=============NOT FOUND CURVE FROM S3', e);
                     callback(e);
                 }
-                fs.appendFileSync(lasFilePath, space.spaceAfter(WHLEN1, curve.name) + space.spaceAfter(WHLEN2 + WHLEN3, '.' + curve.curve_revisions[0].unit) + ': ' + curve.description + '\r\n');
+                fs.appendFileSync(lasFilePath, space.spaceAfter(WHLEN1, normalizedCurveName) + space.spaceAfter(WHLEN2 + WHLEN3, '.' + curve.curve_revisions[0].unit) + ': ' + curve.description + '\r\n');
             } else { //export from project
                 let curvePath = await hashDir.createPath(curveBasePath, project.createdBy + project.name + well.name + dataset.name + curve.name, curve.name + '.txt');
                 console.log('curvePath', curvePath);
                 stream = fs.createReadStream(curvePath);
-                fs.appendFileSync(lasFilePath, space.spaceAfter(WHLEN1, curve.name) + space.spaceAfter(WHLEN2 + WHLEN3, '.' + curve.unit) + ': ' + curve.description + '\r\n');
+                fs.appendFileSync(lasFilePath, space.spaceAfter(WHLEN1, normalizedCurveName) + space.spaceAfter(WHLEN2 + WHLEN3, '.' + curve.unit) + ': ' + curve.description + '\r\n');
             }
             stream = byline.createStream(stream).pause();
             readStreams.push(stream);
 
             if (idCurve == 0)
-                curveColumns += space.spaceBefore(15, curve.name);
+                curveColumns += space.spaceBefore(15, normalizedCurveName);
             else
-                curveColumns += space.spaceBefore(18, curve.name);
+                curveColumns += space.spaceBefore(18, normalizedCurveName);
 
         }
     }
