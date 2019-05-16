@@ -41,7 +41,7 @@ function writeHeader(csvStream, well, idCurves) {
         async.eachOfSeries(dataset.curves, function (curve, idx, nextCurve) {
             if(idCurves.find(function (id) {return id == curve.idCurve}) && curve.name != MDCurve) {
                 console.log('curve', curve.name, curve.unit);
-                columnArr.push(curve.name);
+                columnArr.push(normalizeName(curve.name));
                 unitArr.push(curve.unit);
             }
             nextCurve();
@@ -55,6 +55,13 @@ function writeHeader(csvStream, well, idCurves) {
         csvStream.write(columnArr);
         csvStream.write(unitArr);
     })
+}
+
+function normalizeName(name) {
+    let newName = name.replace(/[&\/\\#,+()$~%.'":*?<>{}\|]+/g,' ')
+                        .trim()
+                        .replace(/\s+/g,'_');
+    return newName;
 }
 
 async function writeDataset(csvStream, writeStream, project, well, dataset, idCurves, numOfPreCurve, s3, curveModel, curveBasePath, callback) {

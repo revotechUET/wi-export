@@ -33,6 +33,14 @@ function writeHeader(csvStream, well) {
     csvStream.write(headerArr);
     csvStream.write([]);
 }
+
+function normalizeName(name) {
+    let newName = name.replace(/[&\/\\#,+()$~%.'":*?<>{}\|]+/g,' ')
+                        .trim()
+                        .replace(/\s+/g,'_');
+    return newName;
+}
+
 async function writeCurve(lasFilePath, exportPath, fileName, project, well, dataset, idCurves, s3, curveModel, curveBasePath, callback) {
     /*export from inventory
         project, curveBasePath are null
@@ -67,7 +75,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
         let curve = dataset.curves.find(function (curve) { return curve.idCurve == idCurve });
         if (curve && curve.name != MDCurve) {
             let stream;
-            curveNameArr.push(curve.name);
+            curveNameArr.push(normalizeName(curve.name));
             let unit = curve.curve_revisions ? curve.curve_revisions[0].unit : curve.unit;
             curveUnitArr.push(unit);
             if (!project) { //export from inventory
