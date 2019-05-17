@@ -121,7 +121,7 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
                 line = space.spaceAfter(19, normalizedCurveName) + space.spaceAfter(40, '.' + curve.unit) + ': ' + curve.description + '\r\n';
 				if (curve.type == 'ARRAY') {
 					for (let i = 0; i < curve.dimension; i++) {
-						line = space.spaceAfter(19, normalizedCurveName + `_${i}`) + space.spaceAfter(40, '.' + curve.unit) + ': ' + curve.description + '\r\n';
+						line += space.spaceAfter(19, normalizedCurveName + `_${i}`) + space.spaceAfter(40, '.' + curve.unit) + ': ' + curve.description + '\r\n';
 					}
 				} else {
 					line = space.spaceAfter(19, normalizedCurveName) + space.spaceAfter(40, '.' + curve.unit) + ': ' + curve.description + '\r\n';
