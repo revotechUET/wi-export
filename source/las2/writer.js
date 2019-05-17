@@ -158,8 +158,8 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                 let curvePath = await curveModel.getCurveKey(curve.curve_revisions[0]);
                 console.log('curvePath=========', curvePath);
                 try {
-                    // stream = await s3.getData(curvePath);
-					stream = await fs.createReadStream('/mnt/B2C64575C6453ABD/well-insight/wi-online-inventory/wi-inventory-data/' + curvePath);
+                    stream = await s3.getData(curvePath);
+					// stream = await fs.createReadStream('/mnt/B2C64575C6453ABD/well-insight/wi-online-inventory/wi-inventory-data/' + curvePath);
                 } catch (e) {
                     console.log('=============NOT FOUND CURVE FROM S3', e);
                     callback(e);
