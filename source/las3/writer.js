@@ -113,21 +113,35 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
         let curve = dataset.curves.find(function (curve) {
             return curve.idCurve == idCurve
         });
-        let line;
+        let line = '';
         if (curve && curve.name != MDCurve) {
             let stream;
             let normalizedCurveName = normalizeName(curve.name);
             if (project) { //export from project
                 line = space.spaceAfter(19, normalizedCurveName) + space.spaceAfter(40, '.' + curve.unit) + ': ' + curve.description + '\r\n';
+				if (curve.type == 'ARRAY') {
+					for (let i = 0; i < curve.dimension; i++) {
+						line = space.spaceAfter(19, normalizedCurveName + `_${i}`) + space.spaceAfter(40, '.' + curve.unit) + ': ' + curve.description + '\r\n';
+					}
+				} else {
+					line = space.spaceAfter(19, normalizedCurveName) + space.spaceAfter(40, '.' + curve.unit) + ': ' + curve.description + '\r\n';
+				}
                 let curvePath = await hashDir.createPath(curveBasePath, project.createdBy + project.name + well.name + dataset.name + curve.name, curve.name + '.txt');
                 console.log('curvePath', curvePath);
                 stream = fs.createReadStream(curvePath);
             } else { //export from inventory
-                line = space.spaceAfter(19, normalizedCurveName) + space.spaceAfter(40, '.' + curve.curve_revisions[0].unit) + ': ' + curve.description + '\r\n';
+				if (curve.type == 'ARRAY') {
+					for (let i = 0; i < curve.dimension; i++) {
+						line += space.spaceAfter(19, normalizedCurveName + `_${i}`) + space.spaceAfter(40, '.' + curve.curve_revisions[0].unit) + ': ' + curve.description + '\r\n';
+					}
+				} else {
+					line = space.spaceAfter(19, normalizedCurveName) + space.spaceAfter(40, '.' + curve.curve_revisions[0].unit) + ': ' + curve.description + '\r\n';
+				}
                 let curvePath = await curveModel.getCurveKey(curve.curve_revisions[0]);
                 console.log('curvePath=========', curvePath);
                 try {
                     stream = await s3.getData(curvePath)
+					// stream = await fs.createReadStream('/mnt/B2C64575C6453ABD/well-insight/wi-online-inventory/wi-inventory-data/' + curvePath);
                 } catch (e) {
                     console.log('=============NOT FOUND CURVE FROM S3', e);
                     callback(e);
@@ -175,21 +189,25 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
                 readLine++;
                 let tokens = line.toString('utf8').split("||");
                 let index = tokens.toString().substring(0, tokens.toString().indexOf(" "));
-                tokens = tokens.toString().substring(tokens.toString().indexOf(" ") + 1);
+                tokens = tokens.toString().substring(tokens.toString().indexOf(" ") + 1).split(' ');
                 // if (tokens == null || tokens == NaN || tokens.substring(0, 4) == 'null' || tokens == 'NaN' || !tokens) {
                 let _ = require('lodash');
-               
-                if(readStreams[i].type != "TEXT"){
-                    if (!_.isFinite(parseFloat(tokens))) {
+                if(readStreams[i].type == "NUMBER"){
+                    if (!_.isFinite(parseFloat(tokens[0]))) {
                         // let nullHeader = well.well_headers.find(header => {
                         //     return header.header == "NULL";
                         // })
                         // tokens = nullHeader ? nullHeader.value :  '-999.0000';
                         tokens = '-9999';
-                    } 
-                    else tokens = parseFloat(tokens).toFixed(4);
-                }
-                tokens = space.spaceBefore(14, tokens) + ' ';
+                    } else tokens = parseFloat(tokens[0]).toFixed(4);
+					tokens = space.spaceBefore(14, tokens) + ' ';
+				} else if (readStreams[i].type == 'ARRAY') {
+					tokens = tokens.map((elt) => {
+						return space.spaceBefore(14, parseFloat(elt).toFixed(4)) + ' ';
+					}).join(',');
+				} else {
+					tokens = space.spaceBefore(14, tokens[0]) + ' ';
+				}
                 if (i === 0) {
                     index = Number(index);
                     let depth;

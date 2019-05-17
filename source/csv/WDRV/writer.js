@@ -164,7 +164,7 @@ async function writeDataset(csvStream, writeStream, project, well, dataset, idCu
                 //     // tokens = nullHeader ? nullHeader.value :  '-999.0000';
                 //     tokens = '-9999';
                 // }
-				if (readStreams[i].type != 'TEXT') {
+				if (readStreams[i].type == 'NUMBER') {
 					if (!_.isFinite(parseFloat(tokens[0]))) {
 						tokens = ['-9999'];
 					}
