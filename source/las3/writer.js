@@ -10,6 +10,8 @@ let _wellTopDepth;
 let _wellBottomDepth;
 let _wellStep;
 let _wellUnit;
+let _ = require('lodash');
+const NULL_VAL = "-9999";
 
 module.exports.setUnitTable = setUnitTable;
 function setUnitTable(unitTable) {
@@ -60,7 +62,7 @@ function writeWellHeader(lasFilePath, well) {
 
     fs.appendFileSync(lasFilePath, strtHeader + '\r\n' + stopHeader + '\r\n' + stepHeader + '\r\n' + totalHeader + '\r\n');
     //append other headers
-    let nullHeader = space.spaceAfter(19, 'NULL') + space.spaceAfter(10, '.') + space.spaceAfter(30, '-9999') + ": NULL VALUE\r\n";
+    let nullHeader = space.spaceAfter(19, 'NULL') + space.spaceAfter(10, '.') + space.spaceAfter(30, NULL_VAL) + ": NULL VALUE\r\n";
     fs.appendFileSync(lasFilePath, nullHeader);
 
     let wellHeader = space.spaceAfter(19, 'WELL') + space.spaceAfter(10, '.') + space.spaceAfter(30, well.name) + ": " + 'WELL NAME' + '\r\n';
@@ -177,7 +179,6 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
                 let index = tokens.toString().substring(0, tokens.toString().indexOf(" "));
                 tokens = tokens.toString().substring(tokens.toString().indexOf(" ") + 1);
                 // if (tokens == null || tokens == NaN || tokens.substring(0, 4) == 'null' || tokens == 'NaN' || !tokens) {
-                let _ = require('lodash');
                
                 if(readStreams[i].type != "TEXT"){
                     if (!_.isFinite(parseFloat(tokens))) {
@@ -185,9 +186,17 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
                         //     return header.header == "NULL";
                         // })
                         // tokens = nullHeader ? nullHeader.value :  '-999.0000';
-                        tokens = '-9999';
+                        tokens = NULL_VAL;
                     } 
                     else tokens = parseFloat(tokens).toFixed(4);
+                }
+                else {
+                    if(tokens == "null"){
+                        tokens = NULL_VAL;
+                    }
+                    else if(!tokens.includes('"')){
+                        tokens = '"' + tokens + '"';
+                    }
                 }
                 tokens = space.spaceBefore(14, tokens) + ' ';
                 if (i === 0) {
