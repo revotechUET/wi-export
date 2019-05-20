@@ -230,6 +230,14 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                         tokens = '-9999';
                     } else tokens = parseFloat(tokens).toFixed(4);
                 }
+                else {
+                    if(tokens == "null"){
+                        tokens = NULL_VAL;
+                    }
+                    else if(!tokens.includes('"')){
+                        tokens = '"' + tokens + '"';
+                    }
+                }
                 tokens = space.spaceBefore(17, tokens) + ' ';
                 if (i === 0) {
                     index = Number(index);
