@@ -78,7 +78,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
             let unit = curve.curve_revisions ? curve.curve_revisions[0].unit : curve.unit;
 			if (curve.type === 'ARRAY') {
 				for (let i = 0; i < curve.dimension; i++) {
-					curveNameArr.push(normalizeName(curve.name) + '_' + i);
+					curveNameArr.push(normalizeName(curve.name) + `[${i}]`);
 					curveUnitArr.push(unit);
 				}
 			} else {

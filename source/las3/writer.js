@@ -122,7 +122,7 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
             if (project) { //export from project
 				if (curve.type == 'ARRAY') {
 					for (let i = 0; i < curve.dimension; i++) {
-						line += space.spaceAfter(19, normalizedCurveName + `_${i}`) + space.spaceAfter(40, '.' + curve.unit) + ': ' + curve.description + '\r\n';
+						line += space.spaceAfter(19, normalizedCurveName + `[${i}]`) + space.spaceAfter(40, '.' + curve.unit) + ': ' + curve.description + '\r\n';
 					}
 				} else {
 					line = space.spaceAfter(19, normalizedCurveName) + space.spaceAfter(40, '.' + curve.unit) + ': ' + curve.description + '\r\n';
@@ -133,7 +133,7 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
             } else { //export from inventory
 				if (curve.type == 'ARRAY') {
 					for (let i = 0; i < curve.dimension; i++) {
-						line += space.spaceAfter(19, normalizedCurveName + `_${i}`) + space.spaceAfter(40, '.' + curve.curve_revisions[0].unit) + ': ' + curve.description + '\r\n';
+						line += space.spaceAfter(19, normalizedCurveName + `[${i}]`) + space.spaceAfter(40, '.' + curve.curve_revisions[0].unit) + ': ' + curve.description + '\r\n';
 					}
 				} else {
 					line = space.spaceAfter(19, normalizedCurveName) + space.spaceAfter(40, '.' + curve.curve_revisions[0].unit) + ': ' + curve.description + '\r\n';

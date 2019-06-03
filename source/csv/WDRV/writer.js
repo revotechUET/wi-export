@@ -64,7 +64,7 @@ function writeHeader(csvStream, well, idCurves) {
                 console.log('curve', curve.name, curve.unit);
 				if (curve.type === 'ARRAY') {
 					for (let i = 0; i < curve.dimension; i++) {
-						columnArr.push(normalizeName(curve.name) + '_' + i);
+						columnArr.push(normalizeName(curve.name) + `[${i}]`);
 						unitArr.push(curve.unit);
 					}
 				} else{
