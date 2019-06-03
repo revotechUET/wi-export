@@ -189,7 +189,7 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
             readStreams[i].stream.on('data', function (line) {
                 readLine++;
                 let index = line.toString().substring(0, line.toString().indexOf(" "));
-                let tokens = tokens.toString().substring(tokens.toString().indexOf(" ") + 1).split(' ');
+                let tokens = line.toString().substring(line.toString().indexOf(" ") + 1).split(' ');
                 // if (tokens == null || tokens == NaN || tokens.substring(0, 4) == 'null' || tokens == 'NaN' || !tokens) {
                 if(readStreams[i].type == "NUMBER"){
                     if (!_.isFinite(parseFloat(tokens[0]))) {

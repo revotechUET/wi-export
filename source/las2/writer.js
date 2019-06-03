@@ -240,7 +240,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
             readStreams[i].stream.on('data', function (line) {
                 readLine++;
                 let index = line.toString().substring(0, line.toString().indexOf(" "));
-                let tokens = tokens.toString().substring(tokens.toString().indexOf(" ") + 1).split(' ');
+                let tokens = line.toString().substring(line.toString().indexOf(" ") + 1).split(' ');
                 if(readStreams[i].type == "NUMBER"){
                     if (!_.isFinite(parseFloat(tokens[0]))) {
                         // let nullHeader = well.well_headers.find(header => {
