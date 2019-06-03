@@ -9,6 +9,8 @@ const WHLEN1 = 19;
 const WHLEN2 = 10;
 const WHLEN3 = 30;
 let _unitTable = null;
+const _ = require('lodash');
+const NULL_VAL = "-9999";
 
 module.exports.setUnitTable = setUnitTable;
 
@@ -159,16 +161,29 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                 console.log('curvePath=========', curvePath);
                 try {
                     stream = await s3.getData(curvePath);
+					// stream = await fs.createReadStream('/mnt/B2C64575C6453ABD/well-insight/wi-online-inventory/wi-inventory-data/' + curvePath);
                 } catch (e) {
                     console.log('=============NOT FOUND CURVE FROM S3', e);
                     callback(e);
                 }
-                fs.appendFileSync(lasFilePath, space.spaceAfter(WHLEN1, normalizedCurveName) + space.spaceAfter(WHLEN2 + WHLEN3, '.' + curve.curve_revisions[0].unit) + ': ' + curve.description + '\r\n');
+				if (curve.type == 'ARRAY') {
+					for (let i = 0; i < curve.dimension; i++) {
+						fs.appendFileSync(lasFilePath, space.spaceAfter(WHLEN1, normalizedCurveName + `_${i}`) + space.spaceAfter(WHLEN2 + WHLEN3, '.' + curve.curve_revisions[0].unit) + ': ' + curve.description + '\r\n');
+					}
+				} else {
+					fs.appendFileSync(lasFilePath, space.spaceAfter(WHLEN1, normalizedCurveName) + space.spaceAfter(WHLEN2 + WHLEN3, '.' + curve.curve_revisions[0].unit) + ': ' + curve.description + '\r\n');
+				}
             } else { //export from project
                 let curvePath = await hashDir.createPath(curveBasePath, project.createdBy + project.name + well.name + dataset.name + curve.name, curve.name + '.txt');
                 console.log('curvePath', curvePath);
                 stream = fs.createReadStream(curvePath);
-                fs.appendFileSync(lasFilePath, space.spaceAfter(WHLEN1, normalizedCurveName) + space.spaceAfter(WHLEN2 + WHLEN3, '.' + curve.unit) + ': ' + curve.description + '\r\n');
+				if (curve.type == 'ARRAY') {
+					for (let i = 0; i < curve.dimension; i++) {
+						fs.appendFileSync(lasFilePath, space.spaceAfter(WHLEN1, normalizedCurveName + `_${i}`) + space.spaceAfter(WHLEN2 + WHLEN3, '.' + curve.unit) + ': ' + curve.description + '\r\n');
+					}
+				} else {
+					fs.appendFileSync(lasFilePath, space.spaceAfter(WHLEN1, normalizedCurveName) + space.spaceAfter(WHLEN2 + WHLEN3, '.' + curve.unit) + ': ' + curve.description + '\r\n');
+				}
             }
             stream = byline.createStream(stream).pause();
             readStreams.push({
@@ -176,11 +191,18 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                 type: curve.type
             });
 
-            if (idCurve == 0)
+			if (idCurve == 0) {
                 curveColumns += space.spaceBefore(15, normalizedCurveName);
-            else
-                curveColumns += space.spaceBefore(18, normalizedCurveName);
-
+			}
+			else{
+				if (curve.type == 'ARRAY') {
+					for (let i = 0; i < curve.dimension; i++) {
+						curveColumns += space.spaceBefore(18, normalizedCurveName + `_${i}`);
+					}
+				} else {
+					curveColumns += space.spaceBefore(18, normalizedCurveName);
+				}
+			}
         }
     }
 
@@ -217,18 +239,21 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
             let writeLine = 0;
             readStreams[i].stream.on('data', function (line) {
                 readLine++;
-                let tokens = line.toString('utf8').split("||");
-                let index = tokens.toString().substring(0, tokens.toString().indexOf(" "));
-                tokens = tokens.toString().substring(tokens.toString().indexOf(" ") + 1);
-                let _ = require('lodash');
-                if(readStreams[i].type != "TEXT"){
-                    if (!_.isFinite(parseFloat(tokens))) {
+                let index = line.toString().substring(0, line.toString().indexOf(" "));
+                let tokens = tokens.toString().substring(tokens.toString().indexOf(" ") + 1).split(' ');
+                if(readStreams[i].type == "NUMBER"){
+                    if (!_.isFinite(parseFloat(tokens[0]))) {
                         // let nullHeader = well.well_headers.find(header => {
                         //     return header.header == "NULL";
                         // })
                         // tokens = nullHeader ? nullHeader.value :  '-999.0000';
-                        tokens = '-9999';
+                        tokens = NULL_VAL;
                     } else tokens = parseFloat(tokens).toFixed(4);
+                }
+				else if (readStreams[i].type == 'ARRAY') {
+					tokens = tokens.map((elt) => {
+						return space.spaceBefore(17, parseFloat(elt).toFixed(4)) + ' ';
+					}).join('');
                 }
                 else {
                     if(tokens == "null"){

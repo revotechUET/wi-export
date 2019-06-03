@@ -29,6 +29,7 @@ function convertUnit(value, fromUnit, desUnit) {
 }
 
 function writeHeader(csvStream, well, idCurves) {
+	console.log(idCurves);
     console.log('---------idCurves', idCurves);
     //let headerArr = ['$Csv :WELL ', 'Dataset'];
     //headerArr.push(well.name)
@@ -38,11 +39,40 @@ function writeHeader(csvStream, well, idCurves) {
     let columnArr = ['WELL', 'Dataset', 'Depth'];
     let unitArr = ['.', '.', _wellUnit || 'M'];
     async.eachOfSeries(well.datasets, function (dataset, index, nextDataset) {
-        async.eachOfSeries(dataset.curves, function (curve, idx, nextCurve) {
-            if(idCurves.find(function (id) {return id == curve.idCurve}) && curve.name != MDCurve) {
+        // async.eachOfSeries(dataset.curves, function (curve, idx, nextCurve) {
+        //     if(idCurves.find(function (id) {return id == curve.idCurve}) && curve.name != MDCurve) {
+        //         console.log('curve', curve.name, curve.unit);
+				// if (curve.type === 'ARRAY') {
+					// for (let i = 0; i < curve.dimension; i++) {
+						// columnArr.push(normalizeName(curve.name) + '_' + i);
+						// unitArr.push(curve.unit);
+					// }
+				// } else{
+					// columnArr.push(normalizeName(curve.name));
+					// unitArr.push(curve.unit);
+				// } 
+        //         // columnArr.push(normalizeName(curve.name));
+        //         // unitArr.push(curve.unit);
+        //     }
+        //     nextCurve();
+        // }, function (err) {
+        //     nextDataset();
+        // })
+        async.eachOfSeries(idCurves, function (idCurve, idx, nextCurve) {
+			let curve = dataset.curves.find(function (curve) {return curve.idCurve == idCurve});
+            if(curve && curve.name != MDCurve) {
                 console.log('curve', curve.name, curve.unit);
-                columnArr.push(normalizeName(curve.name));
-                unitArr.push(curve.unit);
+				if (curve.type === 'ARRAY') {
+					for (let i = 0; i < curve.dimension; i++) {
+						columnArr.push(normalizeName(curve.name) + '_' + i);
+						unitArr.push(curve.unit);
+					}
+				} else{
+					columnArr.push(normalizeName(curve.name));
+					unitArr.push(curve.unit);
+				} 
+                // columnArr.push(normalizeName(curve.name));
+                // unitArr.push(curve.unit);
             }
             nextCurve();
         }, function (err) {
@@ -75,6 +105,7 @@ async function writeDataset(csvStream, writeStream, project, well, dataset, idCu
     let step = Number.parseFloat(convertUnit(Number.parseFloat(dataset.step), fromUnit, _wellUnit).toFixed(4));
     let readStreams = [];
 
+	console.log(idCurves);
     for (idCurve of idCurves) {
         let curve = dataset.curves.find(function (curve) { return curve.idCurve == idCurve });
         if (curve && curve.name != MDCurve) {
@@ -84,6 +115,7 @@ async function writeDataset(csvStream, writeStream, project, well, dataset, idCu
                 console.log('curvePath=========', curvePath);
                 try {
                     stream = await s3.getData(curvePath);
+					// stream = await fs.createReadStream('/mnt/B2C64575C6453ABD/well-insight/wi-online-inventory/wi-inventory-data/' + curvePath);
                 } catch (e) {
                     console.log('=============NOT FOUND CURVE FROM S3', e);
                     callback(e);
@@ -93,7 +125,11 @@ async function writeDataset(csvStream, writeStream, project, well, dataset, idCu
                 stream = fs.createReadStream(curvePath);
             }
             stream = byline.createStream(stream).pause();
-            readStreams.push(stream);
+			readStreams.push({
+				stream: stream,
+				curveName: normalizeName(curve.name),
+				type: curve.type
+			});
         }
     }
 
@@ -110,24 +146,35 @@ async function writeDataset(csvStream, writeStream, project, well, dataset, idCu
                 }
             }
     } else {
-        readStreams[0].resume();
+        readStreams[0].stream.resume();
         let lineArr;
         for (let i = 0; i < readStreams.length; i++) {
             let readLine = 0;
             let writeLine = 0;
-            readStreams[i].on('data', function (line) {
+            readStreams[i].stream.on('data', function (line) {
                 readLine++;
                 let tokens = line.toString('utf8').split("||");
                 let index = tokens.toString().substring(0, tokens.toString().indexOf(" "));
-                tokens = tokens.toString().substring(tokens.toString().indexOf(" ") + 1);
+                tokens = tokens.toString().substring(tokens.toString().indexOf(" ") + 1).split(' ');
                 let _ = require('lodash');
-                if (!_.isFinite(parseFloat(tokens))) {
-                    // let nullHeader = well.well_headers.find(header => {
-                    //     return header.header == "NULL";
-                    // })
-                    // tokens = nullHeader ? nullHeader.value :  '-999.0000';
-                    tokens = '-9999';
-                }
+                // if (!_.isFinite(parseFloat(tokens))) {
+                //     // let nullHeader = well.well_headers.find(header => {
+                //     //     return header.header == "NULL";
+                //     // })
+                //     // tokens = nullHeader ? nullHeader.value :  '-999.0000';
+                //     tokens = '-9999';
+                // }
+				if (readStreams[i].type == 'NUMBER') {
+					if (!_.isFinite(parseFloat(tokens[0]))) {
+						tokens = ['-9999'];
+					}
+				} else {
+					tokens = tokens.map((elt, i, arr) => {
+						if (elt.includes('"')) {
+							return elt.replace(/"/g, '');
+						} else return elt;
+					})
+				}
                 if (i === 0) {
                     let depth;
                     if (step == 0) depth = convertUnit(Number(index), 'M', _wellUnit).toFixed(4);
@@ -135,11 +182,12 @@ async function writeDataset(csvStream, writeStream, project, well, dataset, idCu
                     lineArr = generateLineArr(well.name, dataset.name, depth, numOfPreCurve);
                     top += step;
                 }
-                lineArr.push(tokens);
+                // lineArr.push(tokens);
+				lineArr = [...lineArr, ...tokens];
                 if (i !== readStreams.length - 1) {
-                    readStreams[i].pause();
-                    if (readStreams[i + 1].isPaused()) {
-                        readStreams[i + 1].resume();
+                    readStreams[i].stream.pause();
+                    if (readStreams[i + 1].stream.isPaused()) {
+                        readStreams[i + 1].stream.resume();
                     }
                 } else {
                     csvStream.write(lineArr, function () {
@@ -149,13 +197,13 @@ async function writeDataset(csvStream, writeStream, project, well, dataset, idCu
                         }
                     });
                     lineArr = generateLineArr(well.name, dataset.name, numOfPreCurve);
-                    readStreams[i].pause();
-                    if (readStreams[0].isPaused()) {
-                        readStreams[0].resume();
+                    readStreams[i].stream.pause();
+                    if (readStreams[0].stream.isPaused()) {
+                        readStreams[0].stream.resume();
                     }
                 }
             })
-            readStreams[i].on('end', function () {
+            readStreams[i].stream.on('end', function () {
                 if (!readStreams.numLine) {
                     readStreams.numLine = readLine;
                 }
@@ -165,7 +213,7 @@ async function writeDataset(csvStream, writeStream, project, well, dataset, idCu
                 console.log('END TIME', new Date(), readStreams.numLine);
                 if (i != readStreams.length - 1) {
                     console.log('---', i, readStreams.length - 1);
-                    readStreams[i + 1].resume();
+                    readStreams[i + 1].stream.resume();
                 }
                 if (readStreams.numLine && readStreams.numLine === writeLine) {
                     callback();
