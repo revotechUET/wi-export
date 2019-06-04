@@ -125,7 +125,7 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
 						line += space.spaceAfter(19, normalizedCurveName + `[${i}]`) + space.spaceAfter(40, '.' + curve.unit) + ': ' + curve.description + ' {F}\r\n';
 					}
 				} else {
-					line = space.spaceAfter(19, normalizedCurveName) + space.spaceAfter(40, '.' + curve.unit) + ': ' + curve.description + curve.type == "NUMBER"? ' {F}' : ' {S}' + '\r\n';
+					line = space.spaceAfter(19, normalizedCurveName) + space.spaceAfter(40, '.' + curve.unit) + ': ' + curve.description + (curve.type == "NUMBER"? ' {F}' : ' {S}') + '\r\n';
 				}
                 let curvePath = await hashDir.createPath(curveBasePath, project.createdBy + project.name + well.name + dataset.name + curve.name, curve.name + '.txt');
                 console.log('curvePath', curvePath);
@@ -133,10 +133,10 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
             } else { //export from inventory
 				if (curve.type == 'ARRAY') {
 					for (let i = 0; i < curve.dimension; i++) {
-						line += space.spaceAfter(19, normalizedCurveName + `[${i}]`) + space.spaceAfter(40, '.' + curve.curve_revisions[0].unit) + ': ' + curve.description + '\r\n';
+						line += space.spaceAfter(19, normalizedCurveName + `[${i}]`) + space.spaceAfter(40, '.' + curve.curve_revisions[0].unit) + ': ' + curve.description + ' {F}\r\n';
 					}
 				} else {
-					line = space.spaceAfter(19, normalizedCurveName) + space.spaceAfter(40, '.' + curve.curve_revisions[0].unit) + ': ' + curve.description + '\r\n';
+					line = space.spaceAfter(19, normalizedCurveName) + space.spaceAfter(40, '.' + curve.curve_revisions[0].unit) + ': ' + curve.description + (curve.type == "NUMBER"? ' {F}' : ' {S}') + '\r\n';
 				}
                 let curvePath = await curveModel.getCurveKey(curve.curve_revisions[0]);
                 console.log('curvePath=========', curvePath);
