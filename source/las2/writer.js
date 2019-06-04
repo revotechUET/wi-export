@@ -168,10 +168,10 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                 }
 				if (curve.type == 'ARRAY') {
 					for (let i = 0; i < curve.dimension; i++) {
-						fs.appendFileSync(lasFilePath, space.spaceAfter(WHLEN1, normalizedCurveName + `_${i}`) + space.spaceAfter(WHLEN2 + WHLEN3, '.' + curve.curve_revisions[0].unit) + ': ' + curve.description + '\r\n');
+						fs.appendFileSync(lasFilePath, space.spaceAfter(WHLEN1, normalizedCurveName + `_${i}`) + space.spaceAfter(WHLEN2 + WHLEN3, '.' + curve.curve_revisions[0].unit) + ': ' + curve.description + ' {F}\r\n');
 					}
 				} else {
-					fs.appendFileSync(lasFilePath, space.spaceAfter(WHLEN1, normalizedCurveName) + space.spaceAfter(WHLEN2 + WHLEN3, '.' + curve.curve_revisions[0].unit) + ': ' + curve.description + '\r\n');
+					fs.appendFileSync(lasFilePath, space.spaceAfter(WHLEN1, normalizedCurveName) + space.spaceAfter(WHLEN2 + WHLEN3, '.' + curve.curve_revisions[0].unit) + ': ' + curve.description + curve.type == "NUMBER" ? ' {F}':' {S}' + '\r\n');
 				}
             } else { //export from project
                 let curvePath = await hashDir.createPath(curveBasePath, project.createdBy + project.name + well.name + dataset.name + curve.name, curve.name + '.txt');

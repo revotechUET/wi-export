@@ -122,10 +122,10 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
             if (project) { //export from project
 				if (curve.type == 'ARRAY') {
 					for (let i = 0; i < curve.dimension; i++) {
-						line += space.spaceAfter(19, normalizedCurveName + `_${i}`) + space.spaceAfter(40, '.' + curve.unit) + ': ' + curve.description + '\r\n';
+						line += space.spaceAfter(19, normalizedCurveName + `_${i}`) + space.spaceAfter(40, '.' + curve.unit) + ': ' + curve.description + ' {F}\r\n';
 					}
 				} else {
-					line = space.spaceAfter(19, normalizedCurveName) + space.spaceAfter(40, '.' + curve.unit) + ': ' + curve.description + '\r\n';
+					line = space.spaceAfter(19, normalizedCurveName) + space.spaceAfter(40, '.' + curve.unit) + ': ' + curve.description + curve.type == "NUMBER"? ' {F}' : ' {S}' + '\r\n';
 				}
                 let curvePath = await hashDir.createPath(curveBasePath, project.createdBy + project.name + well.name + dataset.name + curve.name, curve.name + '.txt');
                 console.log('curvePath', curvePath);
