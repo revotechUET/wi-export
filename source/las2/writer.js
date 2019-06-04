@@ -168,7 +168,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                 }
 				if (curve.type == 'ARRAY') {
 					for (let i = 0; i < curve.dimension; i++) {
-						fs.appendFileSync(lasFilePath, space.spaceAfter(WHLEN1, normalizedCurveName + `_${i}`) + space.spaceAfter(WHLEN2 + WHLEN3, '.' + curve.curve_revisions[0].unit) + ': ' + curve.description + ' {F}\r\n');
+						fs.appendFileSync(lasFilePath, space.spaceAfter(WHLEN1, normalizedCurveName + `[${i}]`) + space.spaceAfter(WHLEN2 + WHLEN3, '.' + curve.curve_revisions[0].unit) + ': ' + curve.description + ' {F}\r\n');
 					}
 				} else {
 					fs.appendFileSync(lasFilePath, space.spaceAfter(WHLEN1, normalizedCurveName) + space.spaceAfter(WHLEN2 + WHLEN3, '.' + curve.curve_revisions[0].unit) + ': ' + curve.description + curve.type == "NUMBER" ? ' {F}':' {S}' + '\r\n');
@@ -179,7 +179,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                 stream = fs.createReadStream(curvePath);
 				if (curve.type == 'ARRAY') {
 					for (let i = 0; i < curve.dimension; i++) {
-						fs.appendFileSync(lasFilePath, space.spaceAfter(WHLEN1, normalizedCurveName + `_${i}`) + space.spaceAfter(WHLEN2 + WHLEN3, '.' + curve.unit) + ': ' + curve.description + '\r\n');
+						fs.appendFileSync(lasFilePath, space.spaceAfter(WHLEN1, normalizedCurveName + `[${i}]`) + space.spaceAfter(WHLEN2 + WHLEN3, '.' + curve.unit) + ': ' + curve.description + '\r\n');
 					}
 				} else {
 					fs.appendFileSync(lasFilePath, space.spaceAfter(WHLEN1, normalizedCurveName) + space.spaceAfter(WHLEN2 + WHLEN3, '.' + curve.unit) + ': ' + curve.description + '\r\n');
@@ -197,7 +197,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
 			else{
 				if (curve.type == 'ARRAY') {
 					for (let i = 0; i < curve.dimension; i++) {
-						curveColumns += space.spaceBefore(18, normalizedCurveName + `_${i}`);
+						curveColumns += space.spaceBefore(18, normalizedCurveName + `[${i}]`);
 					}
 				} else {
 					curveColumns += space.spaceBefore(18, normalizedCurveName);
