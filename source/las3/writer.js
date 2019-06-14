@@ -203,6 +203,7 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
 					}).join(',');
                 }
                 else {
+					tokens = tokens.join(' ');
                     if(tokens == "null"){
                         tokens = NULL_VAL;
                     }

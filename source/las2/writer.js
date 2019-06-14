@@ -256,6 +256,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
 					}).join('');
                 }
                 else {
+					tokens = tokens.join(' ');
                     if(tokens == "null"){
                         tokens = NULL_VAL;
                     }
