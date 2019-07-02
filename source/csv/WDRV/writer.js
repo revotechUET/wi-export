@@ -165,10 +165,16 @@ async function writeDataset(csvStream, writeStream, project, well, dataset, idCu
                 //     tokens = '-9999';
                 // }
 				if (readStreams[i].type == 'NUMBER') {
+                    tokens = [tokens.join(' ')];
 					if (!_.isFinite(parseFloat(tokens[0]))) {
 						tokens = ['-9999'];
 					}
-				} else {
+				} else if (readStreams[i].type == 'TEXT') {
+                    tokens = [tokens.join(' ')];
+                    if (tokens[0].includes('"')) {
+						tokens[0] = tokens[0].replace(/"/g, '');
+                    }
+                }  else {
 					tokens = tokens.map((elt, i, arr) => {
 						if (elt.includes('"')) {
 							return elt.replace(/"/g, '');
