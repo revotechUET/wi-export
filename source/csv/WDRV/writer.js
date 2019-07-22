@@ -154,9 +154,10 @@ async function writeDataset(csvStream, writeStream, project, well, dataset, idCu
             let writeLine = 0;
             readStreams[i].stream.on('data', function (line) {
                 readLine++;
-                let tokens = line.toString('utf8').split("||").replace(/\s\s+/g, ' ');
-                let index = tokens.toString().substring(0, tokens.toString().indexOf(" "));
-                tokens = tokens.toString().substring(tokens.toString().indexOf(" ") + 1).split(' ');
+                let tokens = line.toString('utf8').split("||");
+                tokens = tokens.toString().replace(/\s\s+/g, ' ');
+                let index = tokens.substring(0, tokens.indexOf(" "));
+                tokens = tokens.substring(tokens.indexOf(" ") + 1).split(' ');
                 // if (!_.isFinite(parseFloat(tokens))) {
                 //     // let nullHeader = well.well_headers.find(header => {
                 //     //     return header.header == "NULL";
