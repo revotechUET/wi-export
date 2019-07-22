@@ -320,8 +320,8 @@ function writeAll(exportPath, project, well, datasetObjs, username, s3, curveMod
     writeVersion(lasFilePath);
     writeWellHeader(lasFilePath, well);
     async.mapSeries(datasetObjs, function (item, cb) {
-        console.log('callback', cb);
-        console.log('111111', item.idCurves);
+        // console.log('callback', cb);
+        // console.log('111111', item.idCurves);
         let dataset = well.datasets.find(function (dataset) {
             return dataset.idDataset == item.idDataset;
         });
