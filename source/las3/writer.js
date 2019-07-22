@@ -188,6 +188,7 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
             let writeLine = 0;
             readStreams[i].stream.on('data', function (line) {
                 readLine++;
+                line = line.replace(/\s\s+/g, ' ');
                 let index = line.toString().substring(0, line.toString().indexOf(" "));
                 let tokens = line.toString().substring(line.toString().indexOf(" ") + 1).split(' ');
                 // if (tokens == null || tokens == NaN || tokens.substring(0, 4) == 'null' || tokens == 'NaN' || !tokens) {

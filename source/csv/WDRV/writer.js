@@ -8,6 +8,7 @@ const MDCurve = '__MD';
 let hashDir = require('../../hash-dir');
 let _unitTable = null;
 let _wellUnit;
+const _ = require('lodash');
 
 module.exports.setUnitTable = setUnitTable;
 function setUnitTable (unitTable) {
@@ -153,10 +154,10 @@ async function writeDataset(csvStream, writeStream, project, well, dataset, idCu
             let writeLine = 0;
             readStreams[i].stream.on('data', function (line) {
                 readLine++;
+                line = line.replace(/\s\s+/g, ' ');
                 let tokens = line.toString('utf8').split("||");
                 let index = tokens.toString().substring(0, tokens.toString().indexOf(" "));
                 tokens = tokens.toString().substring(tokens.toString().indexOf(" ") + 1).split(' ');
-                let _ = require('lodash');
                 // if (!_.isFinite(parseFloat(tokens))) {
                 //     // let nullHeader = well.well_headers.find(header => {
                 //     //     return header.header == "NULL";
