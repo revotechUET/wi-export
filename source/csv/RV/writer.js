@@ -140,8 +140,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
             let writeLine = 0;
             readStreams[i].stream.on('data', function (line) {
                 readLine++;
-                line = line.replace(/\s\s+/g, ' ');
-                let tokens = line.toString('utf8').split("||");
+                let tokens = line.toString('utf8').split("||").replace(/\s\s+/g, ' ');
                 let index = tokens.toString().substring(0, tokens.toString().indexOf(" "));
                 tokens = tokens.toString().substring(tokens.toString().indexOf(" ") + 1).split(' ');
                 // if (!_.isFinite(parseFloat(tokens))) {
