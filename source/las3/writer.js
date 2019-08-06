@@ -81,11 +81,12 @@ function normalizeName(name) {
     return newName;
 }
 async function writeDataset(lasFilePath, fileName, project, well, dataset, idCurves, s3, curveModel, curveBasePath, callback) {
-    fs.appendFileSync(lasFilePath, '\r\n~' + dataset.name.toUpperCase().replace(/ /g, ".").replace(/_DATA/, "") + '_PARAMETER\r\n');
+    const lasDatasetName = dataset.name.toUpperCase().replace(/ /g,'.').replace(/_DATA|_PARAMETER|_DEFINITION/g,"");
+    fs.appendFileSync(lasFilePath, '\r\n~' + lasDatasetName + '_PARAMETER\r\n');
     fs.appendFileSync(lasFilePath, '#_______________________________________________________________________________\r\n');
     fs.appendFileSync(lasFilePath, '#\r\n#PARAMETER_NAME    .UNIT     VALUE                         : DESCRIPTION\r\n#\r\n');
     fs.appendFileSync(lasFilePath, '#_______________________________________________________________________________\r\n');
-    fs.appendFileSync(lasFilePath, space.spaceAfter(19, 'SET') + space.spaceAfter(10, '.') + space.spaceAfter(30, dataset.name) + ':\r\n');
+    fs.appendFileSync(lasFilePath, space.spaceAfter(19, 'SET') + space.spaceAfter(10, '.') + space.spaceAfter(30, lasDatasetName) + ':\r\n');
     if (dataset.dataset_params && dataset.dataset_params.length > 0) {
         for (param of dataset.dataset_params) {
             if(param.mnem != 'SET') {
@@ -94,7 +95,7 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
             }
         }
     }
-    fs.appendFileSync(lasFilePath, '\r\n\r\n~' + dataset.name.toUpperCase().replace(/ /g, ".").replace(/_DATA/, "") + '_DEFINITION\r\n');
+    fs.appendFileSync(lasFilePath, '\r\n\r\n~' + lasDatasetName + '_DEFINITION\r\n');
     fs.appendFileSync(lasFilePath, '#_______________________________________________________________________________\r\n#\r\n');
     fs.appendFileSync(lasFilePath, '#LOGNAME           .UNIT     LOG_ID                        : DESCRIPTION\r\n#\r\n');
     fs.appendFileSync(lasFilePath, '#_______________________________________________________________________________\r\n');
@@ -156,7 +157,7 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
             fs.appendFileSync(lasFilePath, line);
         }
     }
-    fs.appendFileSync(lasFilePath, '\r\n\r\n' + '~' + dataset.name.replace(/ /g, ".").replace(/_DATA/, "") + '_DATA | ' + dataset.name.replace(/ /g, ".") + '_DEFINITION\r\n');
+    fs.appendFileSync(lasFilePath, '\r\n\r\n' + '~' + lasDatasetName + '_DATA | ' + lasDatasetName + '_DEFINITION\r\n');
 
     //writeCurves
     if (readStreams.length === 0 || idCurves.length == 0) {
