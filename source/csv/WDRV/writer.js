@@ -95,7 +95,7 @@ function normalizeName(name) {
     return newName;
 }
 
-async function writeDataset(csvStream, writeStream, project, well, dataset, idCurves, numOfPreCurve, s3, curveModel, curveBasePath, callback) {
+async function writeDataset(csvStream, writeStream, project, well, dataset, idCurves, numOfPreCurve, curveModel, curveBasePath, callback) {
 
     let fromUnit = dataset.unit || 'M';
     if(project) {
@@ -112,11 +112,8 @@ async function writeDataset(csvStream, writeStream, project, well, dataset, idCu
         if (curve && curve.name != MDCurve) {
             let stream;
             if (!project) { //export from inventory
-                let curvePath = await curveModel.getCurveKey(curve.curve_revisions[0]);
-                console.log('curvePath=========', curvePath);
                 try {
-                    stream = await s3.getData(curvePath);
-					// stream = await fs.createReadStream('/mnt/B2C64575C6453ABD/well-insight/wi-online-inventory/wi-inventory-data/' + curvePath);
+                    stream = await curveModel.getCurveData(curve);
                 } catch (e) {
                     console.log('=============NOT FOUND CURVE FROM S3', e);
                     callback(e);
@@ -230,13 +227,13 @@ async function writeDataset(csvStream, writeStream, project, well, dataset, idCu
     }
 }
 
-function writeAll(exportPath, project, well, datasetObjs, username, s3, curveModel, curveBasePath, callback) {
+function writeAll(exportPath, project, well, datasetObjs, username, curveModel, curveBasePath, callback) {
     /*export from inventory
         project, curveBasePath are null
     */
 
     /*export from project
-        well, s3, curveModel are null
+        well, curveModel are null
     */
     console.log('WriteAll exportPath ----', exportPath);
     if (!well) { //export from inventory
@@ -272,7 +269,7 @@ function writeAll(exportPath, project, well, datasetObjs, username, s3, curveMod
     let numOfPreCurve = 0;
     async.eachOfSeries(datasetObjs, function (obj, index, next) {
         let dataset = well.datasets.find(function (dataset) { return dataset.idDataset == obj.idDataset; });
-        writeDataset(csvStream, writeStream, project, well, dataset, obj.idCurves, numOfPreCurve, s3, curveModel, curveBasePath, function (e) {
+        writeDataset(csvStream, writeStream, project, well, dataset, obj.idCurves, numOfPreCurve, curveModel, curveBasePath, function (e) {
             if (e) { console.log(e); }
             numOfPreCurve += obj.idCurves.length;
             next();

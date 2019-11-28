@@ -80,7 +80,7 @@ function normalizeName(name) {
     let newName = name.replace(/[&\/\\#,+()$~%.'":*?<>{}\|]+/g,' ').trim().replace(/\s+/g,'_');
     return newName;
 }
-async function writeDataset(lasFilePath, fileName, project, well, dataset, idCurves, s3, curveModel, curveBasePath, callback) {
+async function writeDataset(lasFilePath, fileName, project, well, dataset, idCurves, curveModel, curveBasePath, callback) {
     const lasDatasetName = dataset.name.toUpperCase().replace(/ /g,'.').replace(/_DATA|_PARAMETER|_DEFINITION/g,"");
     fs.appendFileSync(lasFilePath, '\r\n~' + lasDatasetName + '_PARAMETER\r\n');
     fs.appendFileSync(lasFilePath, '#_______________________________________________________________________________\r\n');
@@ -139,11 +139,8 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
 				} else {
 					line = space.spaceAfter(19, normalizedCurveName) + space.spaceAfter(40, '.' + curve.curve_revisions[0].unit) + ': ' + curve.description + (curve.type == "NUMBER"? ' {F}' : ' {S}') + '\r\n';
 				}
-                let curvePath = await curveModel.getCurveKey(curve.curve_revisions[0]);
-                console.log('curvePath=========', curvePath);
                 try {
-                    stream = await s3.getData(curvePath)
-					// stream = await fs.createReadStream('/mnt/B2C64575C6453ABD/well-insight/wi-online-inventory/wi-inventory-data/' + curvePath);
+                    stream = await curveModel.getCurveData(curve); 
                 } catch (e) {
                     console.log('=============NOT FOUND CURVE FROM S3', e);
                     callback(e);
@@ -273,13 +270,13 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
     }
 }
 
-function writeAll(exportPath, project, well, datasetObjs, username, s3, curveModel, curveBasePath, callback) {
+function writeAll(exportPath, project, well, datasetObjs, username, curveModel, curveBasePath, callback) {
     /*export from inventory
         project, curveBasePath are null
     */
 
     /*export from project
-        well, s3, curveModel are null
+        well, curveModel are null
     */
     console.log('WriteAll exportPath ----', exportPath);
     if (!well) { //export from inventory
@@ -326,7 +323,7 @@ function writeAll(exportPath, project, well, datasetObjs, username, s3, curveMod
         let dataset = well.datasets.find(function (dataset) {
             return dataset.idDataset == item.idDataset;
         });
-        writeDataset(lasFilePath, fileName, project, well, dataset, item.idCurves, s3, curveModel, curveBasePath, cb);
+        writeDataset(lasFilePath, fileName, project, well, dataset, item.idCurves, curveModel, curveBasePath, cb);
     }, function cb(err, rs) {
         console.log('map series callback');
         if (err) {

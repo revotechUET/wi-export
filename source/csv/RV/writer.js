@@ -42,13 +42,13 @@ function normalizeName(name) {
     return newName;
 }
 
-async function writeCurve(lasFilePath, exportPath, fileName, project, well, dataset, idCurves, s3, curveModel, curveBasePath, callback) {
+async function writeCurve(lasFilePath, exportPath, fileName, project, well, dataset, idCurves, curveModel, curveBasePath, callback) {
     /*export from inventory
         project, curveBasePath are null
     */
 
     /*export from project
-        well, s3, curveModel are null
+        well, curveModel are null
     */
     let desUnit = dataset.unit || 'M';
     let fromUnit = dataset.unit || 'M';
@@ -87,11 +87,8 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
 				curveUnitArr.push(unit);
 			}
             if (!project) { //export from inventory
-                let curvePath = await curveModel.getCurveKey(curve.curve_revisions[0]);
-                console.log('curvePath=========', curvePath);
                 try {
-                    stream = await s3.getData(curvePath);
-					// stream = await fs.createReadStream('/mnt/B2C64575C6453ABD/well-insight/wi-online-inventory/wi-inventory-data/' + curvePath);
+                    stream = await curveModel.getCurveData(curve);
                 } catch (e) {
                     console.log('=============NOT FOUND CURVE FROM S3', e);
                     callback(e);
@@ -230,13 +227,13 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
     }
 }
 
-function writeAll(exportPath, project, well, idDataset, idCurves, username, s3, curveModel, curveBasePath, callback) {
+function writeAll(exportPath, project, well, idDataset, idCurves, username, curveModel, curveBasePath, callback) {
     /*export from inventory
         project, curveBasePath are null
     */
 
     /*export from project
-        well, s3, curveModel are null
+        well, curveModel are null
     */
     if (!well) { //export from inventory
         well = project.wells[0];
@@ -257,7 +254,7 @@ function writeAll(exportPath, project, well, idDataset, idCurves, username, s3, 
         fileName = fileName.replace(/\//g, "-");
         lasFilePath = path.join(lasFilePath, fileName);
 
-        writeCurve(lasFilePath, exportPath, fileName, project, well, dataset, idCurves, s3, curveModel, curveBasePath, function (err, rs) {
+        writeCurve(lasFilePath, exportPath, fileName, project, well, dataset, idCurves, curveModel, curveBasePath, function (err, rs) {
             console.log('writeAll callback called', err, rs);
             if (err) {
                 callback(err);

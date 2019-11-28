@@ -105,13 +105,13 @@ function writeWellHeader(lasFilePath, well, dataset, from) {
     }
 }
 
-async function writeCurve(lasFilePath, exportPath, fileName, project, well, dataset, idCurves, s3, curveModel, curveBasePath, callback) {
+async function writeCurve(lasFilePath, exportPath, fileName, project, well, dataset, idCurves, curveModel, curveBasePath, callback) {
     /*export from inventory
         project, curveBasePath are null
     */
 
     /*export from project
-        well, s3, curveModel are null
+        well, curveModel are null
     */
 
     fs.appendFileSync(lasFilePath, '~Parameter\r\n');
@@ -157,10 +157,8 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
             const normalizedCurveName = normalizeName(curve.name);
             let stream;
             if (!project) { //export from inventory
-                let curvePath = await curveModel.getCurveKey(curve.curve_revisions[0]);
-                console.log('curvePath=========', curvePath);
                 try {
-                    stream = await s3.getData(curvePath);
+                    stream = await curveModel.getCurveData(curve);
 					// stream = await fs.createReadStream('/mnt/B2C64575C6453ABD/well-insight/wi-online-inventory/wi-inventory-data/' + curvePath);
                 } catch (e) {
                     console.log('=============NOT FOUND CURVE FROM S3', e);
@@ -326,13 +324,13 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
     }
 }
 
-function writeAll(exportPath, project, well, idDataset, idCurves, username, s3, curveModel, curveBasePath, callback) {
+function writeAll(exportPath, project, well, idDataset, idCurves, username, curveModel, curveBasePath, callback) {
     /*export from inventory
         project, curveBasePath are null
     */
 
     /*export from project
-        well, s3, curveModel are null
+        well, curveModel are null
     */
     console.log('WriteAll exportPath ----', exportPath);
     if (!well) { //export from inventory
@@ -358,7 +356,7 @@ function writeAll(exportPath, project, well, idDataset, idCurves, username, s3, 
         let from = project ? 'project' : 'inventory';
         writeVersion(lasFilePath);
         writeWellHeader(lasFilePath, well, dataset, from);
-        writeCurve(lasFilePath, exportPath, fileName, project, well, dataset, idCurves, s3, curveModel, curveBasePath, function (err, rs) {
+        writeCurve(lasFilePath, exportPath, fileName, project, well, dataset, idCurves, curveModel, curveBasePath, function (err, rs) {
             console.log('writeAll callback called', rs);
             if (err) {
                 callback(err);

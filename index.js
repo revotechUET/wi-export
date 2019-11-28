@@ -15,11 +15,11 @@ function setUnitTable (unitTable, callback) {
     if(callback) callback();
 }
 //from inventory
-module.exports.exportLas2FromInventory = function (well, datasetObjs, exportPath, s3, curveModel, username, callback) {
+module.exports.exportLas2FromInventory = function (well, datasetObjs, exportPath, curveModel, username, callback) {
     async.map(datasetObjs, function (item, cb) {
         let idDataset = item.idDataset;
         let idCurves = item.idCurves;
-        las2Writer.writeAll(exportPath, null, well, idDataset, idCurves, username, s3, curveModel, null, function(err, rs) {
+        las2Writer.writeAll(exportPath, null, well, idDataset, idCurves, username, curveModel, null, function(err, rs) {
             console.log('las2Writer.writeAll callback called');
             if(err) {
                 cb(err);
@@ -36,14 +36,14 @@ module.exports.exportLas2FromInventory = function (well, datasetObjs, exportPath
         }
     });
 }
-module.exports.exportLas3FromInventory = function (well, datasetObjs, exportPath, s3, curveModel, username, callback) {
-    las3Writer.writeAll(exportPath, null, well, datasetObjs, username, s3, curveModel, null, callback);
+module.exports.exportLas3FromInventory = function (well, datasetObjs, exportPath, curveModel, username, callback) {
+    las3Writer.writeAll(exportPath, null, well, datasetObjs, username, curveModel, null, callback);
 }
-module.exports.exportCsvRVFromInventory = function (well, datasetObjs, exportPath, s3, curveModel, username, callback) {
+module.exports.exportCsvRVFromInventory = function (well, datasetObjs, exportPath, curveModel, username, callback) {
     async.map(datasetObjs, function (item, cb) {
         let idDataset = item.idDataset;
         let idCurves = item.idCurves;
-        csvRVWriter.writeAll(exportPath, null, well, idDataset, idCurves, username, s3, curveModel, null, function(err, rs) {
+        csvRVWriter.writeAll(exportPath, null, well, idDataset, idCurves, username, curveModel, null, function(err, rs) {
             if(err) {
                 cb(err);
             } else {
@@ -59,8 +59,8 @@ module.exports.exportCsvRVFromInventory = function (well, datasetObjs, exportPat
         }
     });
 };
-module.exports.exportCsvWDRVFromInventory = function (well, datasetObjs, exportPath, s3, curveModel, username, callback) {
-    csvWDRVWriter.writeAll(exportPath, null, well, datasetObjs, username, s3, curveModel, null, callback);    
+module.exports.exportCsvWDRVFromInventory = function (well, datasetObjs, exportPath, curveModel, username, callback) {
+    csvWDRVWriter.writeAll(exportPath, null, well, datasetObjs, username, curveModel, null, callback);    
 }
 
 //from project
