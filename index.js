@@ -68,7 +68,7 @@ module.exports.exportLas2FromProject = function (project, datasetObjs, exportPat
     async.map(datasetObjs, function (item, cb) {
         let idDataset = item.idDataset;
         let idCurves = item.idCurves;
-        las2Writer.writeAll(exportPath, project, null, idDataset, idCurves, username, null, null, curveBasePath, function(err, rs) {
+        las2Writer.writeAll(exportPath, project, null, idDataset, idCurves, username, null, curveBasePath, function(err, rs) {
             console.log('las2Writer.writeAll callback called');
             if(err) {
                 cb(err);
@@ -90,13 +90,13 @@ module.exports.exportLas2FromProject = function (project, datasetObjs, exportPat
     })
 }
 module.exports.exportLas3FromProject = function (project, datasetObjs, exportPath, curveBasePath, username, callback) {
-    las3Writer.writeAll(exportPath, project, null, datasetObjs, username, null, null, curveBasePath, callback);
+    las3Writer.writeAll(exportPath, project, null, datasetObjs, username, null, curveBasePath, callback);
 }
 module.exports.exportCsvRVFromProject = function (project, datasetObjs, exportPath, curveBasePath, username, callback) {
     async.map(datasetObjs, function (item, cb) {
         let idDataset = item.idDataset;
         let idCurves = item.idCurves;
-        csvRVWriter.writeAll(exportPath, project, null, idDataset, idCurves, username, null, null, curveBasePath, function(err, rs) {
+        csvRVWriter.writeAll(exportPath, project, null, idDataset, idCurves, username, null, curveBasePath, function(err, rs) {
             if(err) {
                 cb(err);
             } else {
@@ -117,5 +117,5 @@ module.exports.exportCsvRVFromProject = function (project, datasetObjs, exportPa
     })
 }
 module.exports.exportCsvWDRVFromProject = function (project, datasetObjs, exportPath, curveBasePath, username, callback) {
-    csvWDRVWriter.writeAll(exportPath, project, null, datasetObjs, username, null, null, curveBasePath, callback);    
+    csvWDRVWriter.writeAll(exportPath, project, null, datasetObjs, username, null, curveBasePath, callback);    
 }
