@@ -312,7 +312,12 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                     console.log('numLine', readStreams.numLine);
                 }
                 if (i == readStreams.length - 1 && readLine == 0) {
-                    callback('No curve data');
+                    //export dataset with curves has no data
+                    callback(null, {
+                        fileName: fileName,
+                        wellName: well.name,
+                        datasetName: dataset.name
+                    });
                 }
                 console.log('END TIME', new Date(), readStreams.numLine);
                 if (i != readStreams.length - 1) {

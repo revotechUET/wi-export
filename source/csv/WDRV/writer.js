@@ -212,7 +212,8 @@ async function writeDataset(csvStream, writeStream, project, well, dataset, idCu
                     readStreams.numLine = readLine;
                 }
                 if (i == readStreams.length - 1 && readLine == 0) {
-                    callback('No curve data');
+                    //export dataset with curves has no data
+                    callback()
                 }
                 console.log('END TIME', new Date(), readStreams.numLine);
                 if (i != readStreams.length - 1) {
