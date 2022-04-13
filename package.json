@@ -37,7 +37,7 @@
   },
   "bundleDependencies": false,
   "dependencies": {
-    "async": "^2.6.1",
+    "async": "^3.2.2",
     "byline": "^5.0.0",
     "fast-csv": "^2.4.1",
     "fs": "0.0.1-security",
