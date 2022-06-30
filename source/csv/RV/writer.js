@@ -42,7 +42,7 @@ function normalizeName(name) {
     return newName;
 }
 
-async function writeCurve(lasFilePath, exportPath, fileName, project, well, dataset, idCurves, curveModel, curveBasePath, callback) {
+async function writeCurve(lasFilePath, exportPath, fileName, project, well, dataset, idCurves, curveModel, curveBasePath, zoneDepthIntervals, callback) {
     /*export from inventory
         project, curveBasePath are null
     */
@@ -71,6 +71,30 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
     let curveUnitArr = [];
     curveNameArr.push('Depth');
     curveUnitArr.push(desUnit);
+
+    console.log(zoneDepthIntervals);
+    
+    let minStartDepth = 9999;
+    for (const item of zoneDepthIntervals) {
+        if (minStartDepth > Number(item.start)) {
+            minStartDepth = Number.parseFloat(item.start);
+        }
+    }
+    if (minStartDepth === 9999) {
+        minStartDepth = 0;
+    }
+
+    let maxEndDepth = 0;
+    for (const item of zoneDepthIntervals) {
+        if (maxEndDepth < Number(item.end)) {
+            maxEndDepth = Number.parseFloat(item.end);
+        }
+    }
+    if (maxEndDepth === 0) {
+        maxEndDepth = 9999;
+    }
+
+    console.log(`minStartDepth: ${minStartDepth}, maxEndDepth: ${maxEndDepth}`);
 
     for (idCurve of idCurves) {
         let curve = dataset.curves.find(function (curve) { return curve.idCurve == idCurve });
@@ -165,13 +189,21 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
 						} else return elt;
 					})
 				}
-                if (i === 0) {
-                    let depth;
-                    if (step == 0) depth = convertUnit(Number(index), 'M', desUnit).toFixed(4);
-                    else depth = top.toFixed(4);
-                    tokenArr.push(depth);
-                    top += step;
+                let depth;
+                if (step == 0) {
+                    depth = convertUnit(Number(index), 'M', desUnit);
+                } else {
+                    depth = top;
                 }
+
+                if (depth < minStartDepth || depth > maxEndDepth) {
+                    tokens = ['-9999'];
+                }
+
+                if (i == 0) {
+                    tokenArr.push(depth.toFixed(4));
+                }
+
                 // tokenArr.push(tokens);
 				tokenArr = [...tokenArr, ...tokens];
                 if (i !== readStreams.length - 1) {
@@ -180,6 +212,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                         readStreams[i + 1].stream.resume();
                     }
                 } else {
+                    top += step;
                     csvStream.write(tokenArr, function () {
                         writeLine++;
                         if (readStreams.numLine && readStreams.numLine === writeLine) {
@@ -232,7 +265,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
     }
 }
 
-function writeAll(exportPath, project, well, idDataset, idCurves, username, curveModel, curveBasePath, callback) {
+function writeAll(exportPath, project, well, idDataset, idCurves, username, curveModel, curveBasePath, zoneDepthIntervals, callback) {
     /*export from inventory
         project, curveBasePath are null
     */
@@ -259,7 +292,7 @@ function writeAll(exportPath, project, well, idDataset, idCurves, username, curv
         fileName = fileName.replace(/\//g, "-");
         lasFilePath = path.join(lasFilePath, fileName);
 
-        writeCurve(lasFilePath, exportPath, fileName, project, well, dataset, idCurves, curveModel, curveBasePath, function (err, rs) {
+        writeCurve(lasFilePath, exportPath, fileName, project, well, dataset, idCurves, curveModel, curveBasePath, zoneDepthIntervals, function (err, rs) {
             console.log('writeAll callback called', err, rs);
             if (err) {
                 callback(err);

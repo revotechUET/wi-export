@@ -95,7 +95,7 @@ function normalizeName(name) {
     return newName;
 }
 
-async function writeDataset(csvStream, writeStream, project, well, dataset, idCurves, numOfPreCurve, curveModel, curveBasePath, callback) {
+async function writeDataset(csvStream, writeStream, project, well, dataset, idCurves, numOfPreCurve, curveModel, curveBasePath, zoneDepthIntervals, callback) {
 
     let fromUnit = dataset.unit || 'M';
     if(project) {
@@ -107,6 +107,30 @@ async function writeDataset(csvStream, writeStream, project, well, dataset, idCu
     let readStreams = [];
 
 	console.log(idCurves);
+    console.log(zoneDepthIntervals);
+    
+    let minStartDepth = 9999;
+    for (const item of zoneDepthIntervals) {
+        if (minStartDepth > Number(item.start)) {
+            minStartDepth = Number.parseFloat(item.start);
+        }
+    }
+    if (minStartDepth === 9999) {
+        minStartDepth = 0;
+    }
+
+    let maxEndDepth = 0;
+    for (const item of zoneDepthIntervals) {
+        if (maxEndDepth < Number(item.end)) {
+            maxEndDepth = Number.parseFloat(item.end);
+        }
+    }
+    if (maxEndDepth === 0) {
+        maxEndDepth = 9999;
+    }
+
+    console.log(`minStartDepth: ${minStartDepth}, maxEndDepth: ${maxEndDepth}`);
+
     for (idCurve of idCurves) {
         let curve = dataset.curves.find(function (curve) { return curve.idCurve == idCurve });
         if (curve && curve.name != MDCurve) {
@@ -179,12 +203,17 @@ async function writeDataset(csvStream, writeStream, project, well, dataset, idCu
 						} else return elt;
 					})
 				}
-                if (i === 0) {
-                    let depth;
-                    if (step == 0) depth = convertUnit(Number(index), 'M', _wellUnit).toFixed(4);
-                    else depth = top.toFixed(4);
-                    lineArr = generateLineArr(well.name, dataset.name, depth, numOfPreCurve);
-                    top += step;
+                let depth;
+                if (step == 0) {
+                    depth = convertUnit(Number(index), 'M', _wellUnit)
+                } else {
+                    depth = top;
+                }
+                if (depth < minStartDepth || depth > maxEndDepth) {
+                    tokens = ['-9999'];
+                }
+                if (i == 0) {
+                    lineArr = generateLineArr(well.name, dataset.name, depth.toFixed(4), numOfPreCurve);
                 }
                 // lineArr.push(tokens);
 				lineArr = [...lineArr, ...tokens];
@@ -194,6 +223,7 @@ async function writeDataset(csvStream, writeStream, project, well, dataset, idCu
                         readStreams[i + 1].stream.resume();
                     }
                 } else {
+                    top += step;
                     csvStream.write(lineArr, function () {
                         writeLine++;
                         if (readStreams.numLine && readStreams.numLine === writeLine) {
@@ -270,7 +300,7 @@ function writeAll(exportPath, project, well, datasetObjs, username, curveModel, 
     let numOfPreCurve = 0;
     async.eachOfSeries(datasetObjs, function (obj, index, next) {
         let dataset = well.datasets.find(function (dataset) { return dataset.idDataset == obj.idDataset; });
-        writeDataset(csvStream, writeStream, project, well, dataset, obj.idCurves, numOfPreCurve, curveModel, curveBasePath, function (e) {
+        writeDataset(csvStream, writeStream, project, well, dataset, obj.idCurves, numOfPreCurve, curveModel, curveBasePath, obj.intervals || [], function (e) {
             if (e) { console.log(e); }
             numOfPreCurve += obj.idCurves.length;
             next();

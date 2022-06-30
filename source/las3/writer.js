@@ -80,7 +80,7 @@ function normalizeName(name) {
     let newName = name.replace(/[&\/\\#,+()$~%.'":*?<>{}\|]+/g,' ').trim().replace(/\s+/g,'_');
     return newName;
 }
-async function writeDataset(lasFilePath, fileName, project, well, dataset, idCurves, curveModel, curveBasePath, callback) {
+async function writeDataset(lasFilePath, fileName, project, well, dataset, idCurves, curveModel, curveBasePath, zoneDepthIntervals, callback) {
     const lasDatasetName = dataset.name.toUpperCase().replace(/ /g,'.').replace(/_DATA|_PARAMETER|_DEFINITION/g,"");
     fs.appendFileSync(lasFilePath, '\r\n~' + lasDatasetName + '_PARAMETER\r\n');
     fs.appendFileSync(lasFilePath, '#_______________________________________________________________________________\r\n');
@@ -111,6 +111,30 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
     let step = Number.parseFloat(convertUnit(Number.parseFloat(dataset.step), fromUnit, desUnit).toFixed(4));
     let readStreams = [];
     let writeStream = fs.createWriteStream(lasFilePath, {flags: 'a'})
+
+    console.log(zoneDepthIntervals);
+    
+    let minStartDepth = 9999;
+    for (const item of zoneDepthIntervals) {
+        if (minStartDepth > Number(item.start)) {
+            minStartDepth = Number.parseFloat(item.start);
+        }
+    }
+    if (minStartDepth === 9999) {
+        minStartDepth = 0;
+    }
+
+    let maxEndDepth = 0;
+    for (const item of zoneDepthIntervals) {
+        if (maxEndDepth < Number(item.end)) {
+            maxEndDepth = Number.parseFloat(item.end);
+        }
+    }
+    if (maxEndDepth === 0) {
+        maxEndDepth = 9999;
+    }
+
+    console.log(`minStartDepth: ${minStartDepth}, maxEndDepth: ${maxEndDepth}`);
     
     for (idCurve of idCurves) {
         let curve = dataset.curves.find(function (curve) {
@@ -211,17 +235,20 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
                     }
                 }
                 tokens = space.spaceBefore(14, tokens) + ' ';
+                index = Number(index);
+                let depth;
+                if (step == 0 || hasDepth) {
+                    depth = convertUnit(index, 'M', desUnit);
+                    hasDepth = true;
+                } else {
+                    depth = top;
+                }
+
+                if (depth < minStartDepth || depth > maxEndDepth) {
+                    tokens = space.spaceBefore(14, NULL_VAL) + ' ';
+                }
                 if (i === 0) {
-                    index = Number(index);
-                    let depth;
-                    if (step == 0 || hasDepth) {
-                        depth = convertUnit(index, 'M', desUnit).toFixed(4) + ',';
-                        hasDepth = true;
-                    } else {
-                        depth = top.toFixed(4).toString() + ',';
-                        top += step;
-                    }
-                    depth = space.spaceBefore(15, depth) + ' ';
+                    depth = space.spaceBefore(15, depth.toFixed(4) + ',') + ' ';
                     tokens = depth + tokens;
                 }
                 if (i !== readStreams.length - 1) {
@@ -233,6 +260,7 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
                         readStreams[i + 1].stream.resume();
                     }
                 } else {
+                    top += step;
                     writeStream.write(tokens + '\r\n', function () {
                         writeLine++;
                         if (readStreams.numLine && readStreams.numLine === writeLine) {
@@ -327,7 +355,8 @@ function writeAll(exportPath, project, well, datasetObjs, username, curveModel, 
         let dataset = well.datasets.find(function (dataset) {
             return dataset.idDataset == item.idDataset;
         });
-        writeDataset(lasFilePath, fileName, project, well, dataset, item.idCurves, curveModel, curveBasePath, cb);
+        let zoneDepthIntervals = item.intervals || [];
+        writeDataset(lasFilePath, fileName, project, well, dataset, item.idCurves, curveModel, curveBasePath, zoneDepthIntervals, cb);
     }, function cb(err, rs) {
         console.log('map series callback');
         if (err) {

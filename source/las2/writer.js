@@ -105,7 +105,7 @@ function writeWellHeader(lasFilePath, well, dataset, from) {
     }
 }
 
-async function writeCurve(lasFilePath, exportPath, fileName, project, well, dataset, idCurves, curveModel, curveBasePath, callback) {
+async function writeCurve(lasFilePath, exportPath, fileName, project, well, dataset, idCurves, curveModel, curveBasePath, zoneDepthIntervals = [], callback) {
     /*export from inventory
         project, curveBasePath are null
     */
@@ -148,6 +148,30 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
     let readStreams = [];
     let writeStream = fs.createWriteStream(lasFilePath, { flags: 'a' });
     let curveColumns = '~A        DEPTH';
+    console.log(zoneDepthIntervals);
+    
+    let minStartDepth = 9999;
+    for (const item of zoneDepthIntervals) {
+        if (minStartDepth > Number(item.start)) {
+            minStartDepth = Number.parseFloat(item.start);
+        }
+    }
+    if (minStartDepth === 9999) {
+        minStartDepth = 0;
+    }
+
+    let maxEndDepth = 0;
+    for (const item of zoneDepthIntervals) {
+        if (maxEndDepth < Number(item.end)) {
+            maxEndDepth = Number.parseFloat(item.end);
+        }
+    }
+    if (maxEndDepth === 0) {
+        maxEndDepth = 9999;
+    }
+
+    console.log(`minStartDepth: ${minStartDepth}, maxEndDepth: ${maxEndDepth}`);
+
 
     for (idCurve of idCurves) {
         let curve = dataset.curves.find(function (curve) {
@@ -264,18 +288,20 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                     }
                 }
                 tokens = space.spaceBefore(17, tokens) + ' ';
-                if (i === 0) {
-                    index = Number(index);
-                    let depth, hasDepth;
-                    if (step == 0 || hasDepth) {
-                        depth = convertUnit(index, 'M', dataset.unit).toFixed(4);
-                        hasDepth = true;
-                    } else {
-                        depth = top.toFixed(4);
-                        top += step;
-                    }
+                index = Number(index);
+                let depth, hasDepth;
+                if (step == 0 || hasDepth) {
+                    depth = convertUnit(index, 'M', dataset.unit);
+                    hasDepth = true;
+                } else {
+                    depth = top;
+                }
 
-                    depth = space.spaceBefore(14, depth) + ' ';
+                if (depth < minStartDepth || depth > maxEndDepth) {
+                    tokens = space.spaceBefore(17, NULL_VAL) + ' ';
+                }
+                if (i === 0) {
+                    depth = space.spaceBefore(14, depth.toFixed(4)) + ' ';
                     tokens = depth + tokens;
                 }
                 if (i !== readStreams.length - 1) {
@@ -286,6 +312,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                         readStreams[i + 1].stream.resume();
                     }
                 } else {
+                    top += step;
                     writeStream.write(tokens + '\r\n', function () {
                         writeLine++;
                         if (readStreams.numLine && readStreams.numLine === writeLine) {
@@ -329,7 +356,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
     }
 }
 
-function writeAll(exportPath, project, well, idDataset, idCurves, username, curveModel, curveBasePath, callback) {
+function writeAll(exportPath, project, well, idDataset, idCurves, username, curveModel, curveBasePath, zoneDepthIntervals, callback) {
     /*export from inventory
         project, curveBasePath are null
     */
@@ -361,7 +388,7 @@ function writeAll(exportPath, project, well, idDataset, idCurves, username, curv
         let from = project ? 'project' : 'inventory';
         writeVersion(lasFilePath);
         writeWellHeader(lasFilePath, well, dataset, from);
-        writeCurve(lasFilePath, exportPath, fileName, project, well, dataset, idCurves, curveModel, curveBasePath, function (err, rs) {
+        writeCurve(lasFilePath, exportPath, fileName, project, well, dataset, idCurves, curveModel, curveBasePath, zoneDepthIntervals, function (err, rs) {
             console.log('writeAll callback called', rs);
             if (err) {
                 callback(err);

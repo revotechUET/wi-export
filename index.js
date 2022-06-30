@@ -19,7 +19,8 @@ module.exports.exportLas2FromInventory = function (well, datasetObjs, exportPath
     async.map(datasetObjs, function (item, cb) {
         let idDataset = item.idDataset;
         let idCurves = item.idCurves;
-        las2Writer.writeAll(exportPath, null, well, idDataset, idCurves, username, curveModel, null, function(err, rs) {
+        let zoneDepthIntervals = item.intervals || [];
+        las2Writer.writeAll(exportPath, null, well, idDataset, idCurves, username, curveModel, null, zoneDepthIntervals, function(err, rs) {
             console.log('las2Writer.writeAll callback called');
             if(err) {
                 cb(err);
@@ -43,7 +44,8 @@ module.exports.exportCsvRVFromInventory = function (well, datasetObjs, exportPat
     async.map(datasetObjs, function (item, cb) {
         let idDataset = item.idDataset;
         let idCurves = item.idCurves;
-        csvRVWriter.writeAll(exportPath, null, well, idDataset, idCurves, username, curveModel, null, function(err, rs) {
+        let zoneDepthIntervals = item.intervals || [];
+        csvRVWriter.writeAll(exportPath, null, well, idDataset, idCurves, username, curveModel, null, zoneDepthIntervals, function(err, rs) {
             if(err) {
                 cb(err);
             } else {
@@ -68,14 +70,15 @@ module.exports.exportLas2FromProject = function (project, datasetObjs, exportPat
     async.map(datasetObjs, function (item, cb) {
         let idDataset = item.idDataset;
         let idCurves = item.idCurves;
-        las2Writer.writeAll(exportPath, project, null, idDataset, idCurves, username, null, curveBasePath, function(err, rs) {
-            console.log('las2Writer.writeAll callback called');
+        let zoneDepthIntervals = item.intervals || [];
+        las2Writer.writeAll(exportPath, project, null, idDataset, idCurves, username, null, curveBasePath, zoneDepthIntervals, function(err, rs) {
+            console.log('las2Writer.writeAllV2 callback called');
             if(err) {
                 cb(err);
             } else {
                 cb(null, rs);
             }
-        });
+        })
     }, function cb (err, result) {
         if (err) {
             callback(err);
@@ -96,7 +99,8 @@ module.exports.exportCsvRVFromProject = function (project, datasetObjs, exportPa
     async.map(datasetObjs, function (item, cb) {
         let idDataset = item.idDataset;
         let idCurves = item.idCurves;
-        csvRVWriter.writeAll(exportPath, project, null, idDataset, idCurves, username, null, curveBasePath, function(err, rs) {
+        let zoneDepthIntervals = item.intervals || [];
+        csvRVWriter.writeAll(exportPath, project, null, idDataset, idCurves, username, null, curveBasePath, zoneDepthIntervals, function(err, rs) {
             if(err) {
                 cb(err);
             } else {
