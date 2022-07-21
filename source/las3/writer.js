@@ -13,6 +13,15 @@ let _wellUnit;
 let _ = require('lodash');
 const NULL_VAL = "-9999";
 
+function checkInZoneDepths(depth, zoneDepthIntervals) {
+    for (const zoneDepth of zoneDepthIntervals) {
+        if ((depth - zoneDepth.start) * (depth - zoneDepth.end) <= 0) {
+            return true
+        } 
+    }
+    return false
+}
+
 module.exports.setUnitTable = setUnitTable;
 function setUnitTable(unitTable) {
     _unitTable = unitTable;
@@ -113,28 +122,6 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
     let writeStream = fs.createWriteStream(lasFilePath, {flags: 'a'})
 
     console.log(zoneDepthIntervals);
-    
-    let minStartDepth = 9999;
-    for (const item of zoneDepthIntervals) {
-        if (minStartDepth > Number(item.start)) {
-            minStartDepth = Number.parseFloat(item.start);
-        }
-    }
-    if (minStartDepth === 9999) {
-        minStartDepth = 0;
-    }
-
-    let maxEndDepth = 0;
-    for (const item of zoneDepthIntervals) {
-        if (maxEndDepth < Number(item.end)) {
-            maxEndDepth = Number.parseFloat(item.end);
-        }
-    }
-    if (maxEndDepth === 0) {
-        maxEndDepth = 9999;
-    }
-
-    console.log(`minStartDepth: ${minStartDepth}, maxEndDepth: ${maxEndDepth}`);
     
     for (idCurve of idCurves) {
         let curve = dataset.curves.find(function (curve) {
@@ -244,9 +231,9 @@ async function writeDataset(lasFilePath, fileName, project, well, dataset, idCur
                     depth = top;
                 }
 
-                if (depth < minStartDepth || depth > maxEndDepth) {
-                    tokens = space.spaceBefore(14, NULL_VAL) + ' ';
-                }
+                if (!checkInZoneDepths(depth, zoneDepthIntervals)) {
+                    tokens = space.spaceBefore(17, NULL_VAL) + ' ';
+                } 
                 if (i === 0) {
                     depth = space.spaceBefore(15, depth.toFixed(4) + ',') + ' ';
                     tokens = depth + tokens;

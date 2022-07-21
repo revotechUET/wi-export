@@ -9,6 +9,15 @@ let hashDir = require('../../hash-dir');
 let _unitTable = null;
 const _ = require('lodash');
 
+function checkInZoneDepths(depth, zoneDepthIntervals) {
+    for (const zoneDepth of zoneDepthIntervals) {
+        if ((depth - zoneDepth.start) * (depth - zoneDepth.end) <= 0) {
+            return true
+        } 
+    }
+    return false
+}
+
 module.exports.setUnitTable = setUnitTable;
 function setUnitTable(unitTable) {
     _unitTable = unitTable;
@@ -74,28 +83,6 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
 
     console.log(zoneDepthIntervals);
     
-    let minStartDepth = 9999;
-    for (const item of zoneDepthIntervals) {
-        if (minStartDepth > Number(item.start)) {
-            minStartDepth = Number.parseFloat(item.start);
-        }
-    }
-    if (minStartDepth === 9999) {
-        minStartDepth = 0;
-    }
-
-    let maxEndDepth = 0;
-    for (const item of zoneDepthIntervals) {
-        if (maxEndDepth < Number(item.end)) {
-            maxEndDepth = Number.parseFloat(item.end);
-        }
-    }
-    if (maxEndDepth === 0) {
-        maxEndDepth = 9999;
-    }
-
-    console.log(`minStartDepth: ${minStartDepth}, maxEndDepth: ${maxEndDepth}`);
-
     for (idCurve of idCurves) {
         let curve = dataset.curves.find(function (curve) { return curve.idCurve == idCurve });
         if (curve && curve.name != MDCurve) {
@@ -196,7 +183,7 @@ async function writeCurve(lasFilePath, exportPath, fileName, project, well, data
                     depth = top;
                 }
 
-                if (depth < minStartDepth || depth > maxEndDepth) {
+                if(!checkInZoneDepths(depth, zoneDepthIntervals)) {
                     tokens = ['-9999'];
                 }
 
