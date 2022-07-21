@@ -11,6 +11,7 @@ let _wellUnit;
 const _ = require('lodash');
 
 function checkInZoneDepths(depth, zoneDepthIntervals) {
+    if (!zoneDepthIntervals.length) return true;
     for (const zoneDepth of zoneDepthIntervals) {
         if ((depth - zoneDepth.start) * (depth - zoneDepth.end) <= 0) {
             return true
